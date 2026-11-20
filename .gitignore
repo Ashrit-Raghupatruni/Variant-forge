@@ -1,0 +1,22 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.class
+.pytest_cache/
+
+# Databases & local dynamic uploads
+backend/uploads/generations/*
+backend/uploads/images/*
+backend/uploads/masks/*
+!backend/uploads/images/.gitkeep
+*.db
+variantforge.db
+
+# OS files
+.DS_Store
+Thumbs.db

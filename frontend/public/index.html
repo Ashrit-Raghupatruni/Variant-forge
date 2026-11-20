@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VariantForge AI - Multi-Platform Creative Editor & Redesign Studio</title>
+  <!-- Tailwind CSS & Fabric.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Telugu:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'Noto Sans Telugu', sans-serif; }
+    .canvas-container { margin: 0 auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); border-radius: 0.75rem; overflow: hidden; }
+    .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.6); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- TOP GLOBAL HEADER BAR                      -->
+  <!-- ========================================== -->
+  <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="navigate('landing')">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center font-extrabold text-white shadow-lg shadow-indigo-500/20 text-lg">
+        VF
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">VariantForge AI</h1>
+          <span class="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">v2.5 Production</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Diffusion & DDPM Engine • SDXL Inpaint • ControlNet • FLUX.2 Klein • Qwen2.5-VL</p>
+      </div>
+    </div>
+    
+    <!-- Primary Navigation Links -->
+    <nav class="flex items-center space-x-1.5 overflow-x-auto custom-scroll py-1">
+      <button onclick="navigate('landing')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="landing">Home</button>
+      <button onclick="navigate('dashboard')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="dashboard">Dashboard</button>
+      <button onclick="navigate('projects-new')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="projects-new">+ New Project</button>
+      <button onclick="navigate('editor')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="editor">Editor Canvas</button>
+      <button onclick="navigate('inpaint')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="inpaint">AI Inpainting</button>
+      <button onclick="navigate('controlnet')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="controlnet">ControlNet Guidance</button>
+      <button onclick="navigate('campaign')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="campaign">Campaign Matrix</button>
+      <button onclick="navigate('redesign')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition" data-view="redesign">Redesign Studio</button>
+      <button onclick="navigate('settings')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center" data-view="settings">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span> Models & DDPM
+      </button>
+    </nav>
+  </header>
+
+  <!-- Global Notification / Progress Banner -->
+  <div id="job-banner" class="hidden bg-slate-900 border-b border-slate-800 px-6 py-2.5 transition-all">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 text-xs text-slate-300">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+        </span>
+        <span id="job-status-label" class="font-medium">Executing Diffusion Pipeline...</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <div class="w-48 bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div id="job-progress-fill" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300" style="width: 25%"></div>
+        </div>
+        <span id="job-progress-pct" class="text-xs font-mono font-bold text-indigo-400">25%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MAIN WORKSPACE VIEWS CONTAINER            -->
+  <!-- ========================================== -->
+  <div id="views-container" class="flex-1 flex flex-col relative overflow-hidden">
+
+    <!-- VIEW 1: LANDING PAGE -->
+    <section id="view-landing" class="view-panel flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-6xl mx-auto space-y-16 py-6">
+        <div class="text-center space-y-6">
+          <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+            <span>✨ Powered by Diffusion Models, DDPM & U-Net Architecture</span>
+          </div>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+            One Campaign Creative. <br/>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+              Every Platform & Language.
+            </span>
+          </h1>
+          <p class="text-base md:text-lg text-slate-400 max-w-2xl mx-auto">
+            Transform advertisements, posters, and flyers into multi-platform campaigns. Retain logos and headlines deterministically while inpainting backgrounds and reflowing typography for Instagram, YouTube, and LinkedIn.
+          </p>
+          <div class="flex items-center justify-center space-x-4 pt-2">
+            <button onclick="navigate('projects-new')" class="px-6 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-95 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 transition">
+              Create Campaign Project
+            </button>
+            <button onclick="navigate('editor')" class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold rounded-xl transition">
+              Open Canvas Editor
+            </button>
+            <button onclick="navigate('dashboard')" class="px-5 py-3.5 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium rounded-xl text-xs transition">
+              View Dashboard
+            </button>
+          </div>
+        </div>
+
+        <!-- Generative Architecture Comparison Cards (DDPM vs GAN vs VAE) -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Architectural Foundation: Diffusion Models & DDPM</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800/80">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-bold text-slate-300 text-xs">GAN (Generative Adversarial)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Previous Model</span>
+              </div>
+              <p class="text-xs text-slate-400">Generator & Discriminator minimax game. Suffers from mode collapse, training instability, and lack of fine-step conditioning.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800/80">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-bold text-slate-300 text-xs">VAE (Variational Autoencoder)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Previous Model</span>
+              </div>
+              <p class="text-xs text-slate-400">Encodes into a probabilistic latent space with Reconstruction Loss + KL Divergence. Frequently produces blurry reconstructions.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-gradient-to-b from-indigo-950/40 to-slate-950 border border-indigo-500/30">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-bold text-indigo-300 text-xs">DDPM & U-Net (Primary Engine)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">VariantForge Core</span>
+              </div>
+              <p class="text-xs text-slate-300">Iterative Forward/Reverse Markovian noise removal with U-Net Skip Connections and Time-Step Embeddings. Preserves critical layout details.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="text-2xl">🎯</div>
+            <h4 class="font-bold text-white text-sm">Deterministic Content Lock</h4>
+            <p class="text-xs text-slate-400">Protects logos, prices, brand headlines, and legal text from generative distortion using separate editable vector layers.</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="text-2xl">🎨</div>
+            <h4 class="font-bold text-white text-sm">SDXL Inpainting & Backgrounds</h4>
+            <p class="text-xs text-slate-400">Targeted region regeneration using DDPM reverse diffusion masks to replace studio environments or unwanted objects.</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="text-2xl">📐</div>
+            <h4 class="font-bold text-white text-sm">ControlNet Structural Canny</h4>
+            <p class="text-xs text-slate-400">Maintains exact product contours, package boundaries, and visual balance during creative generation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: DASHBOARD -->
+    <section id="view-dashboard" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-6xl mx-auto space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white">Campaign Dashboard</h2>
+            <p class="text-xs text-slate-400">Manage campaign projects, variant matrix runs, and model statuses.</p>
+          </div>
+          <button onclick="navigate('projects-new')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs shadow-md">
+            + New Campaign Project
+          </button>
+        </div>
+
+        <!-- Active Projects List -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Saved Projects</h3>
+          <div id="dashboard-projects-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Dynamic project cards injected by app.js -->
+          </div>
+        </div>
+
+        <!-- Recent Generated Variants -->
+        <div class="space-y-4 pt-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Generated Campaign Variants</h3>
+            <button onclick="navigate('campaign')" class="text-xs text-indigo-400 hover:underline">View All in Matrix →</button>
+          </div>
+          <div id="dashboard-variants-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Dynamic variant thumbnails injected by app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: CREATE NEW PROJECT -->
+    <section id="view-projects-new" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-xl font-bold text-white">Create Campaign Project</h2>
+          <p class="text-xs text-slate-400">Initialize a campaign adaptation workspace for multi-platform delivery.</p>
+        </div>
+
+        <form id="form-create-project" class="space-y-4 text-xs">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Project Name *</label>
+            <input type="text" id="new-proj-name" required placeholder="e.g. Nike Summer Air Launch" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Brand Name</label>
+              <input type="text" id="new-proj-brand" placeholder="e.g. Nike" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200" />
+            </div>
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Category</label>
+              <select id="new-proj-category" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                <option value="footwear">Footwear / Apparel</option>
+                <option value="electronics">Consumer Electronics</option>
+                <option value="beverages">Food & Beverages</option>
+                <option value="cosmetics">Beauty & Cosmetics</option>
+                <option value="services">SaaS & Services</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Campaign Description</label>
+            <textarea id="new-proj-desc" rows="2" placeholder="Brief outline of target audience and message..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200"></textarea>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Upload Campaign Creative Image</label>
+            <input type="file" id="new-proj-file" accept="image/*" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-400" />
+          </div>
+          <div class="pt-4 flex items-center justify-end space-x-3">
+            <button type="button" onclick="navigate('dashboard')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">Cancel</button>
+            <button type="submit" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white font-bold shadow-md">Create & Open Workspace</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 4: MAIN CANVAS EDITOR (Fabric.js) -->
+    <section id="view-editor" class="view-panel hidden flex-1 flex flex-col md:flex-row overflow-hidden">
+      <!-- Left Polished Tool Palette Sidebar -->
+      <aside class="w-full md:w-80 bg-slate-900 border-r border-slate-800 p-5 space-y-6 overflow-y-auto custom-scroll text-xs">
+        
+        <!-- 1. Active Image & Direct Upload Dropzone -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200">Creative Image Asset</span>
+            <span id="editor-active-img-status" class="text-[10px] text-indigo-400 font-semibold">Active</span>
+          </div>
+          
+          <div class="relative border-2 border-dashed border-slate-800 hover:border-indigo-500 rounded-lg p-3 text-center transition bg-slate-900/50 cursor-pointer">
+            <input type="file" id="editor-direct-upload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            <div class="space-y-1">
+              <span class="text-base block">🖼️</span>
+              <span class="font-semibold text-slate-300 block">Click or Drop New Image</span>
+              <span class="text-[10px] text-slate-500 block">PNG, JPG, WEBP up to 25MB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Layer Insertion -->
+        <div class="space-y-2.5">
+          <label class="font-bold text-slate-400 uppercase tracking-wider block text-[11px]">Layer Insertion</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="editor-btn-add-headline" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-left flex items-center space-x-2">
+              <span>✍️</span><span>+ Headline</span>
+            </button>
+            <button id="editor-btn-add-cta" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-left flex items-center space-x-2">
+              <span>🏷️</span><span>+ CTA Badge</span>
+            </button>
+            <button id="editor-btn-add-box" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-left flex items-center space-x-2">
+              <span>📦</span><span>+ Shape Box</span>
+            </button>
+            <label class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-left flex items-center space-x-2 cursor-pointer relative overflow-hidden">
+              <input type="file" id="editor-logo-upload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" />
+              <span>✨</span><span>+ Brand Logo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. Multilingual Localization -->
+        <div class="space-y-2.5">
+          <label class="font-bold text-slate-400 uppercase tracking-wider block text-[11px]">Multilingual Copy Localization</label>
+          <div class="flex space-x-2">
+            <select id="editor-lang-select" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="en">English (Default)</option>
+              <option value="hi">Hindi (हिंदी - Devanagari)</option>
+              <option value="te">Telugu (తెలుగు - Dravidian)</option>
+            </select>
+            <button id="editor-btn-apply-lang" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold">Translate</button>
+          </div>
+        </div>
+
+        <!-- 4. AI Transformations -->
+        <div class="space-y-2.5">
+          <label class="font-bold text-slate-400 uppercase tracking-wider block text-[11px]">AI Model Transformations</label>
+          <div class="space-y-2">
+            <button id="editor-btn-rmbg" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg font-medium text-left px-3 flex items-center justify-between">
+              <span class="flex items-center space-x-2"><span>✂️</span><span>Extract Cutout (RMBG)</span></span>
+              <span class="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-indigo-400 border border-slate-800">RMBG-2.0</span>
+            </button>
+            <button onclick="navigate('inpaint')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg font-medium text-left px-3 flex items-center justify-between">
+              <span class="flex items-center space-x-2"><span>🖌️</span><span>Inpaint Region</span></span>
+              <span class="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-indigo-400 border border-slate-800">SDXL DDPM</span>
+            </button>
+            <button onclick="navigate('controlnet')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg font-medium text-left px-3 flex items-center justify-between">
+              <span class="flex items-center space-x-2"><span>📐</span><span>ControlNet Canny Edges</span></span>
+              <span class="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-indigo-400 border border-slate-800">Guidance</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Active Selection & Layers Control -->
+        <div id="editor-selection-controls" class="space-y-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3.5">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-300 uppercase tracking-wider block text-[11px]">Selected Layer</label>
+            <span id="editor-selected-type" class="text-[10px] text-slate-500">None</span>
+          </div>
+          <div class="space-y-2">
+            <button id="editor-btn-delete-element" disabled class="w-full py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 hover:text-white rounded-lg font-semibold text-xs flex items-center justify-center space-x-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition">
+              <span>🗑️</span>
+              <span>Delete Element</span>
+            </button>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <button id="editor-btn-bring-front" disabled class="py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                Bring Forward
+              </button>
+              <button id="editor-btn-send-back" disabled class="py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                Send Backward
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Export -->
+        <div class="pt-2">
+          <button id="editor-btn-export" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 text-xs">
+            Download Canvas (PNG)
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center Canvas Viewport -->
+      <main class="flex-1 bg-slate-950 flex flex-col items-center justify-center p-6 overflow-auto relative">
+        <!-- Interactive Aspect Ratio & History Toolbar -->
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl px-5 py-2.5 shadow-lg text-xs w-full max-w-2xl">
+          <div class="flex items-center space-x-2">
+            <span class="text-slate-400 font-semibold mr-1">Platform Ratio:</span>
+            <button class="ratio-toggle px-3 py-1.5 rounded-full bg-indigo-600 text-white font-semibold transition" data-w="600" data-h="600">1:1 Square</button>
+            <button class="ratio-toggle px-3 py-1.5 rounded-full hover:bg-slate-800 text-slate-300 font-semibold transition" data-w="480" data-h="600">4:5 Portrait</button>
+            <button class="ratio-toggle px-3 py-1.5 rounded-full hover:bg-slate-800 text-slate-300 font-semibold transition" data-w="338" data-h="600">9:16 Story</button>
+            <button class="ratio-toggle px-3 py-1.5 rounded-full hover:bg-slate-800 text-slate-300 font-semibold transition" data-w="600" data-h="338">16:9 Landscape</button>
+          </div>
+
+          <!-- Undo, Redo, Delete Selection Actions -->
+          <div class="flex items-center space-x-1.5 border-l border-slate-800 pl-3">
+            <button id="editor-btn-undo" title="Undo (Ctrl+Z)" disabled class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center space-x-1 font-medium">
+              <span class="text-sm">↩️</span>
+              <span class="hidden sm:inline">Undo</span>
+            </button>
+            <button id="editor-btn-redo" title="Redo (Ctrl+Y)" disabled class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center space-x-1 font-medium">
+              <span class="text-sm">↪️</span>
+              <span class="hidden sm:inline">Redo</span>
+            </button>
+            <button id="editor-btn-delete-selected" title="Delete Selected Element (Del / Backspace)" class="p-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 hover:text-white transition flex items-center space-x-1 font-medium">
+              <span class="text-sm">🗑️</span>
+              <span class="hidden sm:inline">Delete Selected</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="editor-canvas-container" class="relative">
+          <canvas id="main-editor-canvas" width="600" height="600"></canvas>
+        </div>
+      </main>
+    </section>
+
+    <!-- VIEW 5: AI INPAINTING (SDXL & DDPM) -->
+    <section id="view-inpaint" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center">
+              <span class="mr-2">🖌️</span> SDXL Inpainting (DDPM Reverse Diffusion)
+            </h2>
+            <p class="text-xs text-slate-400">Draw a mask over regions to regenerate. Preserves unmasked image regions with mathematical fidelity.</p>
+          </div>
+          <button id="inpaint-btn-run" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white font-bold rounded-xl text-xs shadow-lg shadow-indigo-500/25">
+            ⚡ Run Inpainting
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          <!-- Canvas Brush Drawing -->
+          <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-300">Mask Brush Canvas</span>
+              <div class="flex items-center space-x-3">
+                <label class="text-slate-400">Brush Size:</label>
+                <input type="range" id="inpaint-brush-size" min="10" max="80" value="30" class="w-24" />
+                <button id="inpaint-btn-clear-mask" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700">Clear Mask</button>
+              </div>
+            </div>
+            <div class="flex justify-center bg-slate-950 p-2 rounded-xl">
+              <canvas id="inpaint-draw-canvas" width="500" height="500" class="border border-slate-800 rounded-lg cursor-crosshair"></canvas>
+            </div>
+          </div>
+
+          <!-- Inpainting Parameters -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div>
+              <label class="font-semibold text-slate-300 block mb-1">Replacement Prompt</label>
+              <textarea id="inpaint-prompt" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200" placeholder="e.g. Modern luxury marble countertop with soft warm lighting...">modern minimalist podium, soft studio lighting, ultra sharp focus</textarea>
+            </div>
+            <div>
+              <label class="font-semibold text-slate-300 block mb-1">Negative Prompt</label>
+              <input type="text" id="inpaint-neg-prompt" value="blurry, low quality, artifacts, distorted text" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="font-semibold text-slate-300 block mb-1">Steps</label>
+                <input type="number" id="inpaint-steps" value="25" min="10" max="50" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200" />
+              </div>
+              <div>
+                <label class="font-semibold text-slate-300 block mb-1">Guidance</label>
+                <input type="number" id="inpaint-guidance" value="7.5" step="0.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200" />
+              </div>
+            </div>
+            <!-- Before & After Comparison -->
+            <div class="pt-2">
+              <span class="font-bold text-slate-300 block mb-2">Inpaint Result Preview</span>
+              <div id="inpaint-result-box" class="h-44 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 overflow-hidden">
+                <span>Generated inpaint output will appear here</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: CONTROLNET CANNY GUIDANCE -->
+    <section id="view-controlnet" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center">
+              <span class="mr-2">📐</span> ControlNet Structural Edge Guidance
+            </h2>
+            <p class="text-xs text-slate-400">Conditions SDXL diffusion skip connections on Canny structural boundaries to prevent composition drift.</p>
+          </div>
+          <button id="controlnet-btn-run" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white font-bold rounded-xl text-xs shadow-lg shadow-indigo-500/25">
+            ⚡ Generate Guided Creative
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <!-- Canny Edge Extraction -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-300">Canny Edge Map (Control Input)</span>
+              <button id="controlnet-btn-extract-canny" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700 rounded font-medium">
+                Extract Edges
+              </button>
+            </div>
+            <div id="controlnet-canny-preview" class="h-64 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 overflow-hidden">
+              <span>Canny edge preview</span>
+            </div>
+            <div class="space-y-2">
+              <label class="text-slate-400 block">Conditioning Strength (0.1 - 1.0):</label>
+              <input type="range" id="controlnet-scale" min="0.1" max="1.0" step="0.05" value="0.8" class="w-full" />
+            </div>
+          </div>
+
+          <!-- Generated Controlled Output -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <span class="font-bold text-slate-300 block">Guided Generation Result</span>
+            <div id="controlnet-result-preview" class="h-64 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 overflow-hidden">
+              <span>Generated creative preserving contours</span>
+            </div>
+            <div>
+              <label class="text-slate-300 font-semibold block mb-1">Target Visual Style Prompt</label>
+              <textarea id="controlnet-prompt" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200">luxury neon advertising campaign, dark premium ambient reflections, high fidelity product photography</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: CAMPAIGN MATRIX -->
+    <section id="view-campaign" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-6xl mx-auto space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center">
+              <span class="mr-2">📊</span> Multi-Platform Campaign Matrix
+            </h2>
+            <p class="text-xs text-slate-400">Batch-generate compliant marketing variations across Instagram, YouTube, and LinkedIn.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button id="campaign-btn-run" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white font-bold rounded-xl text-xs shadow-md">
+              ⚡ Generate All Platform Variations
+            </button>
+            <button id="campaign-btn-download-zip" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs shadow-md">
+              Download Campaign ZIP
+            </button>
+          </div>
+        </div>
+
+        <div id="campaign-matrix-grid" class="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <!-- Injected dynamically by app.js: Instagram Square, Portrait, Story, YouTube -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 8: AI REDESIGN STUDIO -->
+    <section id="view-redesign" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-6xl mx-auto space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white flex items-center">
+              <span class="mr-2">✨</span> AI Creative Redesign Studio
+            </h2>
+            <p class="text-xs text-slate-400">Multi-concept image-to-image exploration powered by Qwen2.5-VL and FLUX.2 Klein.</p>
+          </div>
+          <button id="redesign-btn-run" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-95 text-white font-bold rounded-xl text-xs shadow-md">
+            ⚡ Analyze & Redesign (3 Concepts)
+          </button>
+        </div>
+
+        <!-- 3 Concept Cards Grid -->
+        <div id="redesign-concepts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Injected dynamically by app.js: Minimalist Luxury, Bold Promo, Editorial -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 9: SETTINGS, MODEL STATUS & DDPM ARCHITECTURE -->
+    <section id="view-settings" class="view-panel hidden flex-1 overflow-y-auto p-8 custom-scroll">
+      <div class="max-w-5xl mx-auto space-y-8">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-2xl font-bold text-white">AI Models & GPU Connection</h2>
+          <p class="text-xs text-slate-400">Tesla T4 Remote GPU Worker configuration, real-time VRAM monitoring, and model lifecycle control.</p>
+        </div>
+
+        <!-- Colab Remote Worker Connect -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 text-xs">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-white text-sm">Google Colab Remote GPU Worker (FastAPI + ngrok)</h3>
+            <span id="remote-worker-pill" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Offline / Checking...</span>
+          </div>
+          <p class="text-slate-400">Open <code class="text-indigo-400 font-mono">ml_worker/VariantForge_GPU_Inference.ipynb</code> in Google Colab, select T4 GPU, run all cells, and paste your active ngrok URL below:</p>
+          <div class="flex space-x-3">
+            <input type="text" id="setting-remote-url" placeholder="https://xxxx.ngrok-free.app" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 font-mono" />
+            <button id="setting-btn-save-remote" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white font-bold rounded-lg shadow-md">
+              Connect Worker
+            </button>
+            <button id="setting-btn-disconnect" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 rounded-lg font-semibold">
+              Disconnect
+            </button>
+          </div>
+
+          <!-- Real-time GPU & VRAM Diagnostics -->
+          <div id="gpu-stats-card" class="bg-slate-950 border border-slate-800 rounded-xl p-4 mt-3 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-slate-400 block text-[11px]">Hardware Accelerator:</span>
+                <span id="gpu-device-name" class="font-bold text-slate-200 text-sm">Tesla T4 (16 GB VRAM)</span>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-400 block text-[11px]">Memory Status:</span>
+                <span id="gpu-vram-text" class="font-mono font-bold text-indigo-400">0.0 / 16.0 GB Used</span>
+              </div>
+            </div>
+            <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
+              <div id="gpu-vram-bar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7-Model Dynamic Readiness Table -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 text-xs">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-white text-sm uppercase tracking-wider">Model Lifecycle & Readiness on Colab T4</h3>
+            <span class="text-[11px] text-slate-400">On-demand swapping active</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse border border-slate-800">
+              <thead>
+                <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
+                  <th class="p-3">Model</th>
+                  <th class="p-3">Architecture</th>
+                  <th class="p-3">State</th>
+                  <th class="p-3">Memory Footprint</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-300">
+                <tr>
+                  <td class="p-3 font-semibold text-white">SDXL Inpainting 1.0</td>
+                  <td class="p-3 text-slate-400">DDPM Reverse U-Net</td>
+                  <td class="p-3"><span id="st-sdxl" class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">Available</span></td>
+                  <td class="p-3 text-slate-400">~6.5 GB</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">SDXL ControlNet Canny</td>
+                  <td class="p-3 text-slate-400">Canny Edge Guidance</td>
+                  <td class="p-3"><span id="st-cnet" class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">Available</span></td>
+                  <td class="p-3 text-slate-400">Shared with SDXL</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">FLUX.2 Klein 4B</td>
+                  <td class="p-3 text-slate-400">Flow Matching Transformer</td>
+                  <td class="p-3"><span id="st-flux" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">Unloaded</span></td>
+                  <td class="p-3 text-slate-400">~12.5 GB (CPU Offloaded)</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">Qwen2.5-VL 3B Instruct</td>
+                  <td class="p-3 text-slate-400">Multimodal Vision-Language</td>
+                  <td class="p-3"><span id="st-qwen" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">Unloaded</span></td>
+                  <td class="p-3 text-slate-400">~3.5 GB</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">Meta SAM 2.1</td>
+                  <td class="p-3 text-slate-400">Hiera Large Segmentation</td>
+                  <td class="p-3"><span id="st-sam2" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">Unloaded</span></td>
+                  <td class="p-3 text-slate-400">~1.2 GB</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">BRIA RMBG-2.0</td>
+                  <td class="p-3 text-slate-400">Salient Object Segmentation</td>
+                  <td class="p-3"><span id="st-rmbg" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">Unloaded</span></td>
+                  <td class="p-3 text-slate-400">~0.8 GB</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">PaddleOCR / EasyOCR</td>
+                  <td class="p-3 text-slate-400">Deterministic Copy Extraction</td>
+                  <td class="p-3"><span id="st-ocr" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Ready</span></td>
+                  <td class="p-3 text-slate-400">CPU / GPU</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Theoretical Comparison Panel (Exam & Technical Reference) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5 text-xs">
+          <h3 class="font-bold text-white text-sm uppercase tracking-wider">Diffusion Models & DDPM Architecture Reference</h3>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse border border-slate-800">
+              <thead>
+                <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
+                  <th class="p-3">Model / Concept</th>
+                  <th class="p-3">Core Paradigm</th>
+                  <th class="p-3">Characteristics / Limitations</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-400">
+                <tr>
+                  <td class="p-3 font-semibold text-slate-200">GAN (Generative Adversarial)</td>
+                  <td class="p-3">Generator vs. Discriminator minimax optimization</td>
+                  <td class="p-3 text-amber-400">Prone to mode collapse and training instability.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-slate-200">VAE (Variational Autoencoder)</td>
+                  <td class="p-3">Probabilistic latent space with Reconstruction Loss + KL Divergence</td>
+                  <td class="p-3 text-amber-400">Tends to produce blurry outputs due to pixel-space averaging.</td>
+                </tr>
+                <tr class="bg-indigo-950/20">
+                  <td class="p-3 font-semibold text-indigo-300">Diffusion Model & DDPM</td>
+                  <td class="p-3 text-slate-200">Forward Markovian noise addition and Reverse iterative denoising</td>
+                  <td class="p-3 text-emerald-400 font-medium">State-of-the-art fidelity, sample diversity, and exact mask inpainting.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- U-Net Architecture Breakdown -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+              <span class="font-bold text-slate-200 block mb-1">1. Encoder</span>
+              <p class="text-slate-400 text-[11px]">Downsamples input images to extract hierarchical feature representations.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+              <span class="font-bold text-slate-200 block mb-1">2. Time-Step Embeddings</span>
+              <p class="text-slate-400 text-[11px]">Informs each U-Net layer of the current diffusion timestep $t$ and noise level.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+              <span class="font-bold text-slate-200 block mb-1">3. Skip Connections</span>
+              <p class="text-slate-400 text-[11px]">Directly links encoder stages to decoder stages to retain fine details and layout edges.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+              <span class="font-bold text-slate-200 block mb-1">4. Decoder</span>
+              <p class="text-slate-400 text-[11px]">Upsamples feature maps and predicts the residual noise $\epsilon_\theta(x_t, t)$.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Global Application Scripts -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

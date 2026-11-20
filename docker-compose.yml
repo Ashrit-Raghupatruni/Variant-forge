@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ML_PROVIDER=remote
+      - REMOTE_ML_URL=${REMOTE_ML_URL}
+    volumes:
+      - ./backend/uploads:/app/uploads
