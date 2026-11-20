@@ -387,47 +387,61 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-          <!-- Canvas Brush Drawing -->
-          <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs">
+          <!-- Canvas Brush Drawing (Interactive Overlay) -->
+          <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-300">Mask Brush Canvas</span>
+              <div>
+                <span class="font-bold text-slate-300 text-sm block">Interactive Mask Canvas</span>
+                <span class="text-[11px] text-slate-400">Brush over the background/areas you want the SDXL model to replace</span>
+              </div>
               <div class="flex items-center space-x-3">
-                <label class="text-slate-400">Brush Size:</label>
-                <input type="range" id="inpaint-brush-size" min="10" max="80" value="30" class="w-24" />
-                <button id="inpaint-btn-clear-mask" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700">Clear Mask</button>
+                <label class="text-slate-400">Brush:</label>
+                <input type="range" id="inpaint-brush-size" min="10" max="90" value="35" class="w-24 accent-indigo-500" />
+                <button id="inpaint-btn-clear-mask" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 font-medium">Clear</button>
               </div>
             </div>
-            <div class="flex justify-center bg-slate-950 p-2 rounded-xl">
-              <canvas id="inpaint-draw-canvas" width="500" height="500" class="border border-slate-800 rounded-lg cursor-crosshair"></canvas>
+            
+            <!-- Dual-layer Canvas: Base image underneath, Semi-transparent red mask on top -->
+            <div class="flex justify-center bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+              <div id="inpaint-canvas-wrapper" class="relative overflow-hidden rounded-lg shadow-2xl" style="width: 540px; height: 540px;">
+                <img id="inpaint-underlay-img" src="" alt="Base creative" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0" />
+                <canvas id="inpaint-draw-canvas" width="540" height="540" class="absolute inset-0 z-10 cursor-crosshair w-full h-full"></canvas>
+              </div>
             </div>
           </div>
 
-          <!-- Inpainting Parameters -->
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <div>
-              <label class="font-semibold text-slate-300 block mb-1">Replacement Prompt</label>
-              <textarea id="inpaint-prompt" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200" placeholder="e.g. Modern luxury marble countertop with soft warm lighting...">modern minimalist podium, soft studio lighting, ultra sharp focus</textarea>
-            </div>
-            <div>
-              <label class="font-semibold text-slate-300 block mb-1">Negative Prompt</label>
-              <input type="text" id="inpaint-neg-prompt" value="blurry, low quality, artifacts, distorted text" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200" />
-            </div>
-            <div class="grid grid-cols-2 gap-3">
+          <!-- Inpainting Controls & Large Output Preview -->
+          <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+            <div class="space-y-3">
               <div>
-                <label class="font-semibold text-slate-300 block mb-1">Steps</label>
-                <input type="number" id="inpaint-steps" value="25" min="10" max="50" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200" />
+                <label class="font-semibold text-slate-300 block mb-1">Replacement Prompt</label>
+                <textarea id="inpaint-prompt" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-xs focus:border-indigo-500 focus:outline-none" placeholder="e.g. Modern luxury marble countertop with soft warm lighting...">modern minimalist podium, soft studio lighting, ultra sharp focus</textarea>
               </div>
               <div>
-                <label class="font-semibold text-slate-300 block mb-1">Guidance</label>
-                <input type="number" id="inpaint-guidance" value="7.5" step="0.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200" />
+                <label class="font-semibold text-slate-300 block mb-1">Negative Prompt</label>
+                <input type="text" id="inpaint-neg-prompt" value="hand, fingers, blurry, low quality, artifacts, distorted text" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 text-xs" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="font-semibold text-slate-300 block mb-1">Steps</label>
+                  <input type="number" id="inpaint-steps" value="20" min="10" max="50" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 text-xs" />
+                </div>
+                <div>
+                  <label class="font-semibold text-slate-300 block mb-1">Guidance</label>
+                  <input type="number" id="inpaint-guidance" value="7.5" step="0.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 text-xs" />
+                </div>
               </div>
             </div>
-            <!-- Before & After Comparison -->
-            <div class="pt-2">
-              <span class="font-bold text-slate-300 block mb-2">Inpaint Result Preview</span>
-              <div id="inpaint-result-box" class="h-44 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 overflow-hidden">
-                <span>Generated inpaint output will appear here</span>
+
+            <!-- Big High-Resolution Output Preview Card -->
+            <div class="pt-2 border-t border-slate-800">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-bold text-white text-xs">Generated Diffusion Output</span>
+                <span id="inpaint-output-badge" class="text-[10px] text-slate-500 font-mono">Waiting for inference</span>
+              </div>
+              <div id="inpaint-result-box" class="h-80 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 overflow-hidden relative shadow-inner">
+                <span class="text-xs text-slate-500">Run inpainting to see photorealistic result here</span>
               </div>
             </div>
           </div>

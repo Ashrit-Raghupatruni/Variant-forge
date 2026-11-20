@@ -613,11 +613,17 @@ window.addEventListener('keydown', (e) => {
 // -------------------------------------------------------------
 function initInpaintCanvas() {
   const canvas = document.getElementById('inpaint-draw-canvas');
+  const imgUnderlay = document.getElementById('inpaint-underlay-img');
   inpaintCanvas = canvas;
   inpaintCtx = canvas.getContext('2d');
-  
-  inpaintCtx.fillStyle = '#000000';
-  inpaintCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Load the active project/canvas image as the interactive backdrop
+  if (currentImageUrl && imgUnderlay) {
+    imgUnderlay.src = currentImageUrl;
+  }
+
+  // Clear transparent canvas on top
+  inpaintCtx.clearRect(0, 0, canvas.width, canvas.height);
 
   let drawing = false;
   canvas.onmousedown = (e) => { drawing = true; drawMask(e); };
@@ -627,11 +633,14 @@ function initInpaintCanvas() {
 
 function drawMask(e) {
   const rect = inpaintCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const scaleX = inpaintCanvas.width / rect.width;
+  const scaleY = inpaintCanvas.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
   const size = document.getElementById('inpaint-brush-size').value;
 
-  inpaintCtx.fillStyle = '#ffffff';
+  // Use visible semi-transparent red in browser UI so user sees exactly what is painted
+  inpaintCtx.fillStyle = 'rgba(239, 68, 68, 0.7)';
   inpaintCtx.beginPath();
   inpaintCtx.arc(x, y, size / 2, 0, Math.PI * 2);
   inpaintCtx.fill();
@@ -639,8 +648,7 @@ function drawMask(e) {
 
 document.getElementById('inpaint-btn-clear-mask').addEventListener('click', () => {
   if (inpaintCtx && inpaintCanvas) {
-    inpaintCtx.fillStyle = '#000000';
-    inpaintCtx.fillRect(0, 0, inpaintCanvas.width, inpaintCanvas.height);
+    inpaintCtx.clearRect(0, 0, inpaintCanvas.width, inpaintCanvas.height);
   }
 });
 
@@ -649,9 +657,32 @@ document.getElementById('inpaint-btn-run').addEventListener('click', async () =>
     alert('Please upload an image first by creating a project or selecting an asset.');
     return;
   }
-  showBannerProgress('Executing SDXL inpainting (DDPM Reverse Diffusion)...', 40);
+  showBannerProgress('Executing SDXL inpainting (DDPM Reverse Diffusion on GPU)...', 40);
 
-  inpaintCanvas.toBlob(async (maskBlob) => {
+  // Generate binary mask for SDXL (black background 0, white mask 255)
+  const binaryCanvas = document.createElement('canvas');
+  binaryCanvas.width = inpaintCanvas.width;
+  binaryCanvas.height = inpaintCanvas.height;
+  const bCtx = binaryCanvas.getContext('2d');
+  
+  // Fill black
+  bCtx.fillStyle = '#000000';
+  bCtx.fillRect(0, 0, binaryCanvas.width, binaryCanvas.height);
+
+  // Read painted alpha pixels and turn them into pure white
+  const imgData = inpaintCtx.getImageData(0, 0, inpaintCanvas.width, inpaintCanvas.height);
+  const bImgData = bCtx.getImageData(0, 0, binaryCanvas.width, binaryCanvas.height);
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    if (imgData.data[i + 3] > 20) { // If user painted here
+      bImgData.data[i] = 255;
+      bImgData.data[i + 1] = 255;
+      bImgData.data[i + 2] = 255;
+      bImgData.data[i + 3] = 255;
+    }
+  }
+  bCtx.putImageData(bImgData, 0, 0);
+
+  binaryCanvas.toBlob(async (maskBlob) => {
     try {
       const formData = new FormData();
       formData.append('file', maskBlob, 'mask.png');
@@ -682,8 +713,13 @@ document.getElementById('inpaint-btn-run').addEventListener('click', async () =>
       }
 
       if (data.result_image_url) {
+        const badge = document.getElementById('inpaint-output-badge');
+        if (badge) {
+          badge.textContent = `${data.width}x${data.height} (Tesla T4 GPU)`;
+          badge.className = 'text-[10px] text-emerald-400 font-bold';
+        }
         document.getElementById('inpaint-result-box').innerHTML = `
-          <img src="${data.result_image_url}" class="w-full h-full object-contain" />
+          <img src="${data.result_image_url}" class="w-full h-full object-contain cursor-pointer transition hover:scale-[1.02]" title="Click to open full resolution" onclick="window.open('${data.result_image_url}', '_blank')" />
         `;
       }
     } catch (err) {
