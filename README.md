@@ -37,8 +37,16 @@ Transforms a single product photograph into **16 production-ready marketing crea
 - Translates marketing copy into **English, Hindi (हिंदी), and Telugu (తెలుగు)**.
 - Dynamic typography reflow algorithms adjust font bounds and sizing to prevent text overflow across languages.
 
-### 5. Verified Deep Learning Benchmarks & GPU Inference
-- For full benchmark logs, image comparisons, and before/after diffusion analysis executed on **Tesla T4 GPU**, see the [Model Verification Report](docs/MODEL_VERIFICATION_REPORT.md).
+### 5. SDXL Inpainting (DDPM Reverse Diffusion) & ControlNet
+- **Targeted Reverse Diffusion**: Denoises masked regions while strictly preserving unmasked creative content using `diffusers/stable-diffusion-xl-1.0-inpainting-0.1`.
+- **Structural ControlNet Guidance (Canny)**: Extracts structural boundaries and edge maps to constrain image generation to exact product packaging, label lines, and physical geometry.
+- **Interactive Dual-Layer Canvas**: Real-time mask drawing directly over the creative underlay with live brush sizing, clear controls, and high-resolution preview.
+- **Undo / Redo & Layer Deletion**: Full history state stack (`Ctrl+Z`, `Ctrl+Y`) and element layer deletion in the Fabric.js canvas editor.
+
+### 6. Verified Deep Learning Benchmarks & GPU Inference
+- For full benchmark logs, image comparisons, and before/after diffusion analysis executed on **Tesla T4 GPU**, see:
+  - [Model Verification & Benchmark Report](docs/MODEL_VERIFICATION_REPORT.md)
+  - [Personalized Perfume Output Report](docs/DHANUSH_PERFUME_OUTPUTS.md)
 
 ---
 
@@ -121,15 +129,15 @@ All 6 test suites verify:
 - OpenCV/Pillow aspect ratio transformations
 - Hindi & Telugu translation and typography reflow bounds
 
-### 3. Dedicated Cloud GPU Worker (Google Colab)
-Because FLUX.2 Klein 4B requires ~13GB VRAM (bfloat16):
+### 3. Dedicated Cloud GPU Worker (Google Colab / Cloud GPU)
+Heavy neural inference (SDXL Inpainting, ControlNet, FLUX.2, SAM 2, RMBG) runs seamlessly on a remote Tesla T4 / A100 GPU:
 1. Open [`ml_worker/VariantForge_GPU_Inference.ipynb`](ml_worker/VariantForge_GPU_Inference.ipynb) in Google Colab with a GPU runtime (T4, A100, or V100).
-2. Run all cells to start the FastAPI worker and expose a public `ngrok` tunnel URL.
-3. In `backend/app/config.py`, set:
+2. Run all cells to start the FastAPI worker and expose a public Cloudflare tunnel (`trycloudflare.com`) or ngrok URL.
+3. In the UI under **Models & DDPM** (or in `backend/app/config.py`), paste the public worker URL:
    ```python
-   REMOTE_ML_URL = "https://your-ngrok-tunnel.ngrok-free.app"
+   REMOTE_ML_URL = "https://your-tunnel.trycloudflare.com"
    ```
-4. All heavy FLUX.2, SAM 2, and RMBG-2.0 inference jobs will execute automatically on the cloud GPU and stream results directly back into your local VariantForge studio.
+4. All heavy diffusion, inpainting, and segmentation inference jobs execute automatically on the cloud GPU and stream results directly back into your local VariantForge studio.
 
 ---
 
@@ -139,13 +147,18 @@ Because FLUX.2 Klein 4B requires ~13GB VRAM (bfloat16):
 |---|---|---|
 | `POST` | `/api/images/upload` | Upload and validate source images (PNG, JPG, WebP) |
 | `GET` | `/api/images/{image_id}` | Retrieve persistent image file |
+| `POST` | `/api/inpaint/` | SDXL Inpainting (DDPM Reverse Diffusion on GPU) |
+| `POST` | `/api/controlnet/canny-preview` | Extract structural Canny edge map |
+| `POST` | `/api/controlnet/generate` | Structure-guided diffusion via ControlNet SDXL |
 | `POST` | `/api/redesign/execute` | 6-stage AI image redesign pipeline (Qwen2.5-VL + PaddleOCR + FLUX.2 Klein) |
 | `POST` | `/api/campaign/generate-matrix` | Generate 4 variations × 4 platforms = 16 creative assets |
 | `GET` | `/api/campaign/export-zip/{zip_id}`| Download hierarchical campaign ZIP bundle |
-| `POST` | `/api/ai/remove-background` | RMBG-2.0 alpha foreground extraction |
+| `POST` | `/api/ai/remove-background` | RMBG-2.0 / U2Net alpha foreground extraction |
 | `POST` | `/api/ai/segment` | Meta SAM 2 point/box promptable segmentation |
 | `POST` | `/api/ai/replace-background` | RMBG foreground + FLUX.2 background + contact shadow composite |
 | `POST` | `/api/creative/resize` | Exact platform resizing (1080x1080, 1080x1350, 1080x1920, 1280x720) |
 | `POST` | `/api/creative/localize` | Marketing copy translation & typography reflow (English, Hindi, Telugu) |
+| `POST` | `/api/models/configure-remote` | Dynamically connect remote Google Colab GPU tunnel |
+| `GET` | `/api/models/status` | Live VRAM and model readiness status |
 | `GET` | `/api/jobs/{job_id}` | Asynchronous job status and progress tracking |
 | `GET` | `/health` | Server and compute device status |
