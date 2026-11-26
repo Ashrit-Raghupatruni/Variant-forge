@@ -9,11 +9,36 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class RemoteWorkerConfigRequest(BaseModel):
-    remote_url: str
+    remote_url: Optional[str] = ""
+
+class CloudApiKeysRequest(BaseModel):
+    fal_key: Optional[str] = None
+    gemini_key: Optional[str] = None
+    together_key: Optional[str] = None
 
 @router.get("/status")
 def get_status():
     return model_manager.get_status()
+
+@router.post("/configure-cloud-keys")
+def configure_cloud_keys(req: CloudApiKeysRequest):
+    import os
+    from app.config import settings
+    if req.fal_key is not None:
+        os.environ["FAL_KEY"] = req.fal_key.strip()
+        setattr(settings, "FAL_KEY", req.fal_key.strip())
+    if req.gemini_key is not None:
+        os.environ["GEMINI_API_KEY"] = req.gemini_key.strip()
+        setattr(settings, "GEMINI_API_KEY", req.gemini_key.strip())
+    if req.together_key is not None:
+        os.environ["TOGETHER_API_KEY"] = req.together_key.strip()
+        setattr(settings, "TOGETHER_API_KEY", req.together_key.strip())
+
+    return {
+        "status": "success",
+        "message": "Cloud API keys updated successfully",
+        "details": model_manager.get_status()
+    }
 
 @router.get("/architecture")
 def get_diffusion_architecture():

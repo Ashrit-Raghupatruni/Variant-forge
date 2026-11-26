@@ -37,7 +37,24 @@ class InpaintingService:
         image_rgb = image.resize((w_clean, h_clean)).convert("RGB")
         mask_l = mask.resize((w_clean, h_clean)).convert("L")
 
-        # 1. Check if Remote GPU Worker (Colab) is available
+        # 1. Check if Managed Cloud AI (Fal.ai SDXL Inpainting) is available
+        from app.services.cloud_ai_service import CloudAIService
+        if CloudAIService.get_fal_key():
+            try:
+                return CloudAIService.inpaint(
+                    image=image_rgb,
+                    mask=mask_l,
+                    prompt=prompt,
+                    negative_prompt=negative_prompt,
+                    num_inference_steps=num_inference_steps,
+                    guidance_scale=guidance_scale,
+                    strength=strength,
+                    seed=seed
+                )
+            except Exception as e:
+                logger.warning(f"Cloud inpainting failed: {e}. Trying remote Colab worker...")
+
+        # 2. Check if Remote GPU Worker (Colab) is available
         if model_manager.is_remote_enabled():
             try:
                 logger.info(f"Dispatching Inpainting to remote GPU: {model_manager.remote_url}/inpaint")

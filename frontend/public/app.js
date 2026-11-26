@@ -987,8 +987,20 @@ async function loadSettings() {
     const vramText = document.getElementById('gpu-vram-text');
     const vramBar = document.getElementById('gpu-vram-bar');
 
+    // Update Cloud API status
+    const cloudPill = document.getElementById('cloud-status-pill');
+    if (cloudPill) {
+      if (data.cloud_enabled) {
+        cloudPill.textContent = 'Cloud AI Active (Fal.ai / Gemini)';
+        cloudPill.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else {
+        cloudPill.textContent = 'No Cloud Keys Set';
+        cloudPill.className = 'px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700';
+      }
+    }
+
     if (data.remote_connected) {
-      pill.textContent = 'Remote Colab GPU Active';
+      pill.textContent = data.cloud_enabled ? 'Cloud AI Engine Ready' : 'Remote Colab GPU Active';
       pill.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
       input.value = data.remote_worker_url || '';
       
@@ -1031,6 +1043,41 @@ if (btnReloadGpu) {
   btnReloadGpu.addEventListener('click', async () => {
     await loadSettings();
     showToast('GPU Diagnostics Refreshed', 'Successfully fetched real-time VRAM allocation and active neural pipelines.', 'info');
+  });
+}
+
+// Save Cloud Keys handler
+const btnSaveCloud = document.getElementById('setting-btn-save-cloud');
+if (btnSaveCloud) {
+  btnSaveCloud.addEventListener('click', async () => {
+    const falKey = document.getElementById('setting-fal-key').value;
+    const geminiKey = document.getElementById('setting-gemini-key').value;
+    if (!falKey && !geminiKey) {
+      showToast('Key Required', 'Please enter at least one API key (Fal.ai or Gemini).', 'error');
+      return;
+    }
+    showBannerProgress('Connecting & validating cloud API keys...', 50);
+    try {
+      const res = await fetch('/api/models/configure-cloud-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fal_key: falKey || null,
+          gemini_key: geminiKey || null
+        })
+      });
+      const data = await res.json();
+      hideBannerProgress();
+      if (res.ok) {
+        showToast('Cloud AI Activated', 'Successfully connected to Fal.ai / Gemini Cloud!', 'success');
+        loadSettings();
+      } else {
+        showToast('Configuration Failed', data.detail || 'Could not save keys.', 'error');
+      }
+    } catch (err) {
+      hideBannerProgress();
+      showToast('Error', err.message, 'error');
+    }
   });
 }
 

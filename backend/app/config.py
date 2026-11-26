@@ -21,9 +21,15 @@ class Settings(BaseModel):
     # Upload storage directory
     UPLOAD_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "uploads")
     
-    # ML Provider settings: "mock", "local", or "remote" (e.g., Colab / GPU worker)
-    ML_PROVIDER: str = os.getenv("ML_PROVIDER", "mock")
+    # ML Provider settings: "mock", "local", "remote", or "cloud"
+    ML_PROVIDER: str = os.getenv("ML_PROVIDER", "cloud")
     REMOTE_ML_URL: str = os.getenv("REMOTE_ML_URL", "")
+    
+    # Cloud API Keys
+    FAL_KEY: str = os.getenv("FAL_KEY", "")
+    TOGETHER_API_KEY: str = os.getenv("TOGETHER_API_KEY", "")
+    REPLICATE_API_TOKEN: str = os.getenv("REPLICATE_API_TOKEN", "")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     
     # FLUX Settings
     FLUX_MODEL_ID: str = "black-forest-labs/FLUX.2-klein-4B"

@@ -16,7 +16,15 @@ class BackgroundRemovalService:
         """
         Takes RGB/RGBA image, strips background, returns RGBA image with transparent alpha channel.
         """
-        # Route 1: Remote GPU Worker
+        # Route 1: Managed Cloud AI (BiRefNet via Fal.ai or local rembg)
+        from app.services.cloud_ai_service import CloudAIService
+        if CloudAIService.get_fal_key():
+            try:
+                return CloudAIService.remove_background(image)
+            except Exception as e:
+                logger.warning(f"Cloud background removal failed: {e}. Trying remote GPU...")
+
+        # Route 2: Remote GPU Worker
         if model_manager.is_remote_enabled():
             try:
                 buf = io.BytesIO()

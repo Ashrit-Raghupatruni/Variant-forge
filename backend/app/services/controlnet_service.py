@@ -51,7 +51,24 @@ class ControlNetService:
         h_clean = (h // 8) * 8
         canny_img = ControlNetService.extract_canny(image.resize((w_clean, h_clean)))
 
-        # 1. Dispatch to Remote Worker if available
+        # 1. Dispatch to Managed Cloud AI (Fal.ai ControlNet Canny) if available
+        from app.services.cloud_ai_service import CloudAIService
+        if CloudAIService.get_fal_key():
+            try:
+                return CloudAIService.controlnet_canny(
+                    image=image,
+                    canny_map=canny_img,
+                    prompt=prompt,
+                    negative_prompt=negative_prompt,
+                    conditioning_scale=conditioning_scale,
+                    num_inference_steps=num_inference_steps,
+                    guidance_scale=guidance_scale,
+                    seed=seed
+                )
+            except Exception as e:
+                logger.warning(f"Cloud ControlNet failed: {e}. Trying remote Colab worker...")
+
+        # 2. Dispatch to Remote Worker if available
         if model_manager.is_remote_enabled():
             try:
                 buf_img = io.BytesIO()

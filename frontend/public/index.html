@@ -553,6 +553,47 @@
           <p class="text-xs text-slate-400">Tesla T4 Remote GPU Worker configuration, real-time VRAM monitoring, and model lifecycle control.</p>
         </div>
 
+        <!-- Managed Cloud AI Keys (Fal.ai, Together AI, Google Gemini) -->
+        <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl space-y-4 text-xs">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                <span>⚡ Managed Cloud AI (API Keys)</span>
+                <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">Recommended</span>
+              </h3>
+              <p class="text-slate-400 mt-1">Zero-setup high-speed cloud inference on NVIDIA H100 GPUs. No Colab timeouts, no tunnels, and zero VRAM limits.</p>
+            </div>
+            <span id="cloud-status-pill" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">Checking...</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <!-- Fal.ai Key -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="text-slate-300 font-bold text-xs">Fal.ai API Key (SDXL, ControlNet, Inpaint, RMBG)</label>
+                <a href="https://fal.ai/dashboard/keys" target="_blank" class="text-indigo-400 hover:underline text-[11px]">Get Key ($10 Free Credit) &rarr;</a>
+              </div>
+              <input type="password" id="setting-fal-key" placeholder="key_id:key_secret (fal.ai)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 font-mono text-xs focus:border-indigo-500 focus:outline-none" />
+            </div>
+
+            <!-- Gemini Key -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="text-slate-300 font-bold text-xs">Google Gemini API Key (Design Audit & Vision)</label>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-400 hover:underline text-[11px]">Get Key (100% Free) &rarr;</a>
+              </div>
+              <input type="password" id="setting-gemini-key" placeholder="AIzaSy... (Google AI Studio)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 font-mono text-xs focus:border-indigo-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+            <span class="text-[11px] text-slate-400">Keys are securely stored in session memory and never shared.</span>
+            <button id="setting-btn-save-cloud" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-bold rounded-lg shadow-md transition">
+              Save Cloud Keys
+            </button>
+          </div>
+        </div>
+
         <!-- Colab Remote Worker Connect -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 text-xs">
           <div class="flex items-center justify-between">

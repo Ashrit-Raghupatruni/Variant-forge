@@ -20,7 +20,22 @@ class ImageGenerationService:
         guidance_scale: float = 1.0,
         seed: Optional[int] = None
     ) -> Image.Image:
-        # Route 1: Remote GPU Worker (Google Colab / Dedicated Cloud GPU)
+        # Route 1: Managed Cloud AI APIs (Fal.ai / Together AI)
+        from app.services.cloud_ai_service import CloudAIService
+        if CloudAIService.is_cloud_enabled():
+            try:
+                return CloudAIService.generate_image(
+                    prompt=prompt,
+                    width=width,
+                    height=height,
+                    num_inference_steps=num_inference_steps,
+                    guidance_scale=guidance_scale,
+                    seed=seed
+                )
+            except Exception as e:
+                logger.warning(f"Cloud generation failed: {e}. Trying remote GPU...")
+
+        # Route 2: Remote GPU Worker (Google Colab / Dedicated Cloud GPU)
         if model_manager.is_remote_enabled():
             try:
                 logger.info(f"Routing FLUX.2 generation to remote worker at {model_manager.remote_url}")
