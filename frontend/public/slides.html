@@ -3,32 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VariantForge AI — Presentation Deck</title>
+  <title>VariantForge AI — Next-Gen Autonomous Creative Engine</title>
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 
   <style>
     /* ==========================================================================
-       CSS RESET & DESIGN TOKENS
+       CYBER-LUXURY DESIGN SYSTEM & THEME TOKENS
        ========================================================================== */
     :root {
-      --bg-dark: #0B1120;
-      --bg-dark-card: rgba(30, 41, 59, 0.7);
-      --bg-light: #F7F5F0;
-      --bg-light-card: #FFFFFF;
-      --text-dark: #0F172A;
-      --text-muted: #64748B;
-      --text-light: #F8FAFC;
-      --text-light-muted: #94A3B8;
-      --accent-coral: #FF5A36;
-      --accent-coral-glow: rgba(255, 90, 54, 0.25);
-      --accent-teal: #0D9488;
-      --accent-teal-light: #2DD4BF;
-      --border-light: #E2E8F0;
-      --border-dark: rgba(255, 255, 255, 0.1);
-      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+      --bg-deep: #050811;
+      --bg-surface: rgba(13, 20, 38, 0.72);
+      --bg-surface-hover: rgba(22, 33, 62, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-glow: rgba(99, 102, 241, 0.35);
+      
+      --neon-cyan: #06B6D4;
+      --neon-teal: #14F195;
+      --neon-violet: #8B5CF6;
+      --neon-indigo: #6366F1;
+      --neon-coral: #FF5A36;
+      --neon-amber: #F59E0B;
+      
+      --text-hero: #FFFFFF;
+      --text-sub: #E2E8F0;
+      --text-muted: #94A3B8;
+      --text-dim: #475569;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -42,801 +49,972 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
+      background-color: var(--bg-deep);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      color: var(--text-hero);
       user-select: none;
     }
 
+    /* Ambient Dynamic Mesh Background */
+    #ambient-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.45;
+    }
+
+    /* Grid overlay */
+    .grid-matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
     /* ==========================================================================
-       DECK STAGE & SLIDE STRUCTURE
+       VIEWPORT & DECK RUNTIME
        ========================================================================== */
-    #deck-stage {
+    #deck-viewport {
       position: relative;
       width: 100vw;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      perspective: 1200px;
-    }
-
-    .slide-viewport {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      max-width: 1920px;
-      max-height: 1080px;
-      aspect-ratio: 16 / 9;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      z-index: 10;
     }
 
     .slide {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      padding: 5rem 6.5rem;
+      width: 90vw;
+      max-width: 1600px;
+      height: 84vh;
+      max-height: 920px;
+      padding: 3.5rem 4.5rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      border-radius: 28px;
+      background: var(--bg-surface);
+      backdrop-filter: blur(28px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 
+        0 30px 80px -20px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      
       opacity: 0;
       visibility: hidden;
-      transform: translateX(60px);
-      transition: transform 450ms var(--ease-fluid), opacity 450ms var(--ease-fluid), visibility 450ms;
+      transform: scale(0.96) translateY(24px);
+      transition: 
+        transform 550ms var(--ease-out-expo),
+        opacity 450ms var(--ease-smooth),
+        visibility 550ms;
       will-change: transform, opacity;
     }
 
     .slide.active {
       opacity: 1;
       visibility: visible;
-      transform: translateX(0);
-      z-index: 10;
+      transform: scale(1) translateY(0);
+      z-index: 20;
     }
 
     .slide.prev {
       opacity: 0;
       visibility: hidden;
-      transform: translateX(-60px);
-      z-index: 5;
+      transform: scale(1.03) translateY(-24px);
+      z-index: 10;
     }
 
-    /* THEMES */
-    .slide.theme-dark {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
+    /* Top Progress Bar */
+    #progress-track {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 100;
     }
 
-    .slide.theme-light {
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-    }
-
-    /* ==========================================================================
-       TYPOGRAPHY & SHARED ELEMENTS
-       ========================================================================== */
-    .slide-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.35rem 0.9rem;
-      border-radius: 9999px;
-      width: fit-content;
-      margin-bottom: 1rem;
-    }
-
-    .theme-dark .slide-badge {
-      background: rgba(255, 90, 54, 0.15);
-      color: var(--accent-coral);
-      border: 1px solid rgba(255, 90, 54, 0.3);
-    }
-
-    .theme-light .slide-badge {
-      background: #EBE7DF;
-      color: #78716C;
-      border: 1px solid #D6D3CD;
-    }
-
-    .slide-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 2.75rem;
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -0.025em;
-      margin-bottom: 0.75rem;
-    }
-
-    .theme-dark .slide-title {
-      color: #FFFFFF;
-    }
-
-    .theme-light .slide-title {
-      color: #0F172A;
-    }
-
-    .slide-subtitle {
-      font-size: 1.25rem;
-      line-height: 1.5;
-      max-width: 900px;
-      font-weight: 400;
-    }
-
-    .theme-dark .slide-subtitle {
-      color: var(--text-light-muted);
-    }
-
-    .theme-light .slide-subtitle {
-      color: #475569;
-    }
-
-    .slide-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding-top: 1.5rem;
-      border-top: 1px solid transparent;
-    }
-
-    .theme-dark .slide-footer {
-      border-color: rgba(255, 255, 255, 0.08);
-      color: var(--text-light-muted);
-    }
-
-    .theme-light .slide-footer {
-      border-color: rgba(0, 0, 0, 0.08);
-      color: var(--text-muted);
+    #progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet), var(--neon-coral));
+      transition: width 400ms var(--ease-out-expo);
+      box-shadow: 0 0 12px var(--neon-cyan);
     }
 
     /* ==========================================================================
        ANIMATIONS (animate skill compliant)
        ========================================================================== */
-    .stagger-item {
+    .stagger-in {
       opacity: 0;
-      transform: translateY(20px);
-      transition: transform 380ms var(--ease-snappy), opacity 380ms var(--ease-snappy);
+      transform: translateY(24px);
+      transition: 
+        transform 480ms var(--ease-out-expo),
+        opacity 480ms var(--ease-smooth);
       will-change: transform, opacity;
     }
 
-    .slide.active .stagger-item {
+    .slide.active .stagger-in {
       opacity: 1;
       transform: translateY(0);
     }
 
-    .slide.active .stagger-delay-1 { transition-delay: 80ms; }
-    .slide.active .stagger-delay-2 { transition-delay: 160ms; }
-    .slide.active .stagger-delay-3 { transition-delay: 240ms; }
-    .slide.active .stagger-delay-4 { transition-delay: 320ms; }
-    .slide.active .stagger-delay-5 { transition-delay: 400ms; }
-    .slide.active .stagger-delay-6 { transition-delay: 480ms; }
-    .slide.active .stagger-delay-7 { transition-delay: 560ms; }
+    .slide.active .delay-1 { transition-delay: 80ms; }
+    .slide.active .delay-2 { transition-delay: 150ms; }
+    .slide.active .delay-3 { transition-delay: 220ms; }
+    .slide.active .delay-4 { transition-delay: 300ms; }
+    .slide.active .delay-5 { transition-delay: 380ms; }
+    .slide.active .delay-6 { transition-delay: 460ms; }
+    .slide.active .delay-7 { transition-delay: 540ms; }
+
+    /* Floating & Glowing Micro-Animations */
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(15px, -20px) scale(1.08); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.4; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+      100% { transform: scale(0.95); opacity: 0.4; }
+    }
+
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(1000%); }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
     /* ==========================================================================
-       SLIDE 1: TITLE SLIDE
+       TYPOGRAPHY & PILLS
        ========================================================================== */
-    .s1-container {
-      display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      align-items: center;
-      height: 100%;
-      gap: 4rem;
-    }
-
-    .s1-emblem-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
-
-    .s1-emblem-glow {
-      position: absolute;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, var(--accent-coral-glow) 0%, rgba(13, 148, 136, 0.15) 50%, transparent 70%);
-      filter: blur(40px);
-      animation: pulseGlow 6s ease-in-out infinite alternate;
-    }
-
-    @keyframes pulseGlow {
-      0% { transform: scale(0.9); opacity: 0.6; }
-      100% { transform: scale(1.15); opacity: 0.9; }
-    }
-
-    .s1-emblem {
-      display: grid;
-      grid-template-columns: repeat(2, 100px);
-      grid-template-rows: repeat(2, 100px);
-      gap: 16px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .s1-tile {
-      width: 100px;
-      height: 100px;
-      border-radius: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      transition: transform 300ms var(--ease-fluid);
-    }
-
-    .s1-tile:hover {
-      transform: scale(1.06);
-    }
-
-    .s1-tile-coral { background: linear-gradient(135deg, #FF6B4A, #FF451A); }
-    .s1-tile-teal  { background: linear-gradient(135deg, #2DD4BF, #0D9488); }
-    .s1-tile-cream { background: linear-gradient(135deg, #FAF8F5, #E5E0D8); }
-    .s1-tile-dark  { background: linear-gradient(135deg, #1E293B, #0F172A); border: 1px solid rgba(255,255,255,0.1); }
-
-    .s1-repo-pill {
+    .badge-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 1rem;
       border-radius: 9999px;
-      color: var(--text-light-muted);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      margin-top: 2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #A5B4FC;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+      margin-bottom: 1rem;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--neon-teal);
+      box-shadow: 0 0 8px var(--neon-teal);
+      animation: pulseRing 2s infinite ease-in-out;
+    }
+
+    .slide-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #FFFFFF 30%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-text-cyan {
+      background: linear-gradient(135deg, #38BDF8, #818CF8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-text-coral {
+      background: linear-gradient(135deg, #FF6B4A, #FFA366);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-text-emerald {
+      background: linear-gradient(135deg, #10B981, #34D399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-subheadline {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 880px;
+      margin-top: 0.6rem;
+    }
+
+    .slide-footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--glass-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-dim);
     }
 
     /* ==========================================================================
-       SLIDE 2: WHAT IT DOES
+       SLIDE 1: HERO PORTAL
        ========================================================================== */
-    .s2-grid {
+    .hero-split {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      align-items: center;
+      gap: 3.5rem;
+      height: 100%;
+    }
+
+    .hero-stats-row {
+      display: flex;
+      gap: 1.75rem;
+      margin-top: 2rem;
+    }
+
+    .hero-stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      padding: 1rem 1.4rem;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* 3D Kinetic Geometric Node */
+    .hero-visual-stage {
+      position: relative;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .orb-glow {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, rgba(6, 182, 212, 0.2) 40%, transparent 70%);
+      filter: blur(60px);
+      animation: floatOrb 8s infinite ease-in-out;
+    }
+
+    .holo-cube-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      transform: rotate(-8deg);
+      transition: transform 400ms var(--ease-out-expo);
+    }
+
+    .holo-cube-wrapper:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+
+    .holo-card {
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .c-one {
+      background: linear-gradient(135deg, rgba(255, 90, 54, 0.8), rgba(255, 45, 85, 0.4));
+    }
+    .c-two {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.8), rgba(59, 130, 246, 0.4));
+    }
+    .c-three {
+      background: linear-gradient(135deg, rgba(20, 241, 149, 0.8), rgba(13, 148, 136, 0.4));
+    }
+    .c-four {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(99, 102, 241, 0.4));
+    }
+
+    .holo-card svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .holo-card span {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: white;
+    }
+
+    /* ==========================================================================
+       SLIDE 2: MULTI-TIER PLATFORM VALUE
+       ========================================================================== */
+    .cards-4-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1.5rem;
       margin: auto 0;
     }
 
-    .s2-card {
-      background: var(--bg-light-card);
+    .tech-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
       border-radius: 20px;
       padding: 2.25rem 1.75rem;
-      border: 1px solid var(--border-light);
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03), 0 8px 10px -6px rgba(0,0,0,0.02);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       height: 380px;
-      transition: transform 250ms var(--ease-fluid), box-shadow 250ms var(--ease-fluid);
+      position: relative;
+      overflow: hidden;
+      transition: all 300ms var(--ease-out-expo);
     }
 
-    .s2-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.07);
+    .tech-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--glass-border-glow);
+      background: var(--bg-surface-hover);
+      box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.3);
     }
 
-    .s2-card-num {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--accent-coral);
-    }
-
-    .s2-card-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-top: 1rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .s2-card-desc {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: #64748B;
-    }
-
-    .s2-card-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: #F1F5F9;
-      color: #475569;
-      padding: 0.35rem 0.65rem;
-      border-radius: 6px;
-      width: fit-content;
-    }
-
-    /* ==========================================================================
-       SLIDE 3: ARCHITECTURE
-       ========================================================================== */
-    .s3-flow {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr auto 1fr;
-      align-items: center;
-      gap: 1.25rem;
-      margin: auto 0;
-    }
-
-    .s3-box {
-      background: var(--bg-light-card);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      padding: 2.25rem;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
-      height: 340px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .s3-box-header {
-      border-bottom: 2px solid #F1F5F9;
-      padding-bottom: 1rem;
-    }
-
-    .s3-box-role {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--accent-coral);
-      letter-spacing: 0.08em;
-    }
-
-    .s3-box-name {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--text-dark);
-      margin-top: 0.25rem;
-    }
-
-    .s3-items {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      margin: 1rem 0;
-    }
-
-    .s3-items li {
-      font-size: 0.9rem;
-      color: #475569;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .s3-items li::before {
+    .tech-card::before {
       content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-teal);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+      opacity: 0;
+      transition: opacity 300ms ease;
     }
 
-    .s3-arrow {
+    .tech-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon-bubble {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #94A3B8;
-      font-size: 1.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 1.25rem;
     }
 
-    .s3-callout {
-      background: #0F172A;
-      color: #F8FAFC;
-      border-radius: 14px;
-      padding: 1.15rem 1.75rem;
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.2);
+    .card-icon-bubble svg {
+      width: 26px;
+      height: 26px;
     }
 
-    .s3-callout-badge {
-      background: var(--accent-coral);
-      color: white;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.45rem;
       font-weight: 700;
-      padding: 0.25rem 0.6rem;
-      border-radius: 6px;
-      text-transform: uppercase;
-      white-space: nowrap;
+      color: #FFFFFF;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-body {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .card-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      width: fit-content;
+      margin-top: 1rem;
     }
 
     /* ==========================================================================
-       SLIDE 4: THE AI MODEL STACK
+       SLIDE 3: LIVE PIPELINE TOPOLOGY (Animated Data Stream)
        ========================================================================== */
-    .s4-table-card {
-      background: var(--bg-light-card);
+    .topology-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 1.5rem;
+      margin: auto 0;
+    }
+
+    .topo-tier {
+      background: rgba(13, 20, 38, 0.8);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      padding: 2.25rem 2rem;
+      height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .topo-tier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tier-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    .tier-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-top: 0.25rem;
+    }
+
+    .topo-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 1.25rem 0;
+    }
+
+    .topo-list li {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .topo-list li svg {
+      width: 16px;
+      height: 16px;
+      color: var(--neon-teal);
+      flex-shrink: 0;
+    }
+
+    /* Animated connector pulses */
+    .stream-bridge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+      width: 60px;
+    }
+
+    .stream-line {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-indigo));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stream-line::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 25px;
+      height: 100%;
+      background: #FFFFFF;
+      box-shadow: 0 0 10px #FFFFFF;
+      animation: streamFlow 1.8s infinite linear;
+    }
+
+    @keyframes streamFlow {
+      0% { transform: translateX(-30px); }
+      100% { transform: translateX(70px); }
+    }
+
+    .stream-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* Banner Alert */
+    .banner-callout {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 1.1rem 1.8rem;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      font-size: 0.92rem;
+      color: var(--text-sub);
+    }
+
+    .banner-icon {
+      background: var(--neon-indigo);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       SLIDE 4: THE NEURAL ENGINE MATRIX (Interactive Stage Map)
+       ========================================================================== */
+    .neural-table-box {
+      background: rgba(13, 20, 38, 0.7);
+      border: 1px solid var(--glass-border);
       border-radius: 20px;
-      border: 1px solid var(--border-light);
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
       overflow: hidden;
       margin: auto 0;
     }
 
-    .s4-table {
+    .neural-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
     }
 
-    .s4-table th {
-      background: #F8FAFC;
-      padding: 1.1rem 1.75rem;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.85rem;
+    .neural-table th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1.1rem 1.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
       font-weight: 700;
-      color: #475569;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border-light);
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--glass-border);
     }
 
-    .s4-table td {
-      padding: 1.1rem 1.75rem;
+    .neural-table td {
+      padding: 1.15rem 1.8rem;
       font-size: 0.95rem;
-      color: #334155;
-      border-bottom: 1px solid #F1F5F9;
+      color: var(--text-sub);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 200ms ease;
     }
 
-    .s4-table tr:last-child td {
-      border-bottom: none;
+    .neural-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .s4-model-tag {
+    .model-badge {
       display: inline-flex;
       align-items: center;
+      gap: 0.5rem;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.82rem;
       font-weight: 600;
-      background: #F0FDF4;
-      color: #166534;
-      border: 1px solid #BBF7D0;
-      padding: 0.25rem 0.6rem;
-      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
     }
 
-    .s4-engine-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: #64748B;
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #38BDF8;
     }
 
-    .s4-note {
-      font-size: 0.85rem;
-      color: #64748B;
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .badge-green {
+      background: rgba(20, 241, 149, 0.12);
+      border: 1px solid rgba(20, 241, 149, 0.3);
+      color: #4ADE80;
+    }
+
+    .badge-violet {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #C084FC;
+    }
+
+    .badge-coral {
+      background: rgba(255, 90, 54, 0.12);
+      border: 1px solid rgba(255, 90, 54, 0.3);
+      color: #FB923C;
     }
 
     /* ==========================================================================
-       SLIDE 5: PROCESS 1 · REDESIGN
+       SLIDE 5: AUTONOMOUS REDESIGN FLOW (6-Phase Circuit)
        ========================================================================== */
-    .s5-grid {
+    .circuit-6-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 1.1rem;
+      gap: 1.2rem;
       margin: auto 0;
     }
 
-    .s5-step-card {
-      background: var(--bg-light-card);
-      border: 1px solid var(--border-light);
-      border-radius: 18px;
-      padding: 1.75rem 1.25rem;
-      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.03);
+    .circuit-node {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.8rem 1.4rem;
+      height: 380px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 360px;
       position: relative;
+      transition: all 300ms var(--ease-out-expo);
     }
 
-    .s5-step-num {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.15rem;
+    .circuit-node:hover {
+      transform: translateY(-6px);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 15px 30px -10px rgba(6, 182, 212, 0.25);
+    }
+
+    .node-idx {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
       font-weight: 800;
-      color: var(--accent-coral);
+      color: rgba(255, 255, 255, 0.2);
     }
 
-    .s5-step-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.2rem;
+    .circuit-node:hover .node-idx {
+      color: var(--neon-cyan);
+    }
+
+    .node-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
       font-weight: 700;
-      color: var(--text-dark);
-      margin-top: 0.75rem;
-      margin-bottom: 0.5rem;
+      color: #FFFFFF;
+      margin: 0.8rem 0 0.5rem 0;
     }
 
-    .s5-step-desc {
+    .node-desc {
       font-size: 0.85rem;
+      color: var(--text-muted);
       line-height: 1.5;
-      color: #64748B;
     }
 
-    .s5-badge {
+    .node-pill {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.72rem;
       font-weight: 600;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      background: #F8FAFC;
-      color: #475569;
-      border: 1px solid #E2E8F0;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-sub);
       width: fit-content;
     }
 
     /* ==========================================================================
-       SLIDE 6: PROCESS 2 · CAMPAIGN MATRIX
+       SLIDE 6: HIGH-THROUGHPUT MATRIX (1 Photo to 16 Production Creatives)
        ========================================================================== */
-    .s6-layout {
+    .matrix-layout {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1.8fr 1fr;
       gap: 2rem;
       margin: auto 0;
     }
 
-    .s6-steps {
+    .matrix-showcase-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 1fr);
       gap: 1rem;
     }
 
-    .s6-mini-card {
-      background: var(--bg-light-card);
-      border: 1px solid var(--border-light);
-      border-radius: 16px;
-      padding: 1.4rem 1.1rem;
-      box-shadow: 0 6px 15px -3px rgba(0,0,0,0.03);
+    .matrix-tile {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      transition: all 250ms ease;
     }
 
-    .s6-mini-num {
-      font-size: 0.85rem;
+    .matrix-tile:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .matrix-tile-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--neon-coral);
       font-weight: 700;
-      color: var(--accent-coral);
     }
 
-    .s6-mini-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.05rem;
+    .matrix-tile-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
       font-weight: 700;
-      color: var(--text-dark);
-      margin-top: 0.35rem;
-      margin-bottom: 0.25rem;
+      color: #FFFFFF;
+      margin: 0.3rem 0 0.2rem 0;
     }
 
-    .s6-mini-desc {
+    .matrix-tile-desc {
       font-size: 0.8rem;
+      color: var(--text-muted);
       line-height: 1.4;
-      color: #64748B;
     }
 
-    .s6-hero-card {
-      background: linear-gradient(145deg, #0F172A, #1E293B);
-      border-radius: 20px;
+    /* Matrix Hero Power Card */
+    .matrix-power-card {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 22px;
       padding: 2.5rem;
-      color: white;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.4);
       position: relative;
       overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(139, 92, 246, 0.35);
     }
 
-    .s6-hero-card::after {
-      content: "";
-      position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 180px;
-      height: 180px;
-      background: var(--accent-coral);
-      filter: blur(60px);
-      opacity: 0.35;
+    .power-stat-giant {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 4.8rem;
+      font-weight: 900;
+      line-height: 0.95;
+      background: linear-gradient(135deg, #FF6B4A, #FFA366);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .s6-hero-stat {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 3.5rem;
+    .power-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
       font-weight: 800;
-      line-height: 1;
-      color: var(--accent-coral);
-    }
-
-    .s6-hero-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
+      color: #FFFFFF;
       margin-top: 0.5rem;
     }
 
-    .s6-specs {
+    .power-spec-list {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      font-size: 0.9rem;
-      color: #94A3B8;
       margin-top: 1.5rem;
     }
 
-    .s6-spec-item {
+    .power-spec-item {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.65rem;
+      font-size: 0.92rem;
+      color: #CBD5E1;
+    }
+
+    .power-spec-item svg {
+      width: 18px;
+      height: 18px;
+      color: var(--neon-teal);
     }
 
     /* ==========================================================================
-       SLIDE 7: STACK AND DELIVERY
+       SLIDE 7: PRODUCTION HARDENING & ENTERPRISE METRICS
        ========================================================================== */
-    .s7-grid {
+    .delivery-split {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2.5rem;
       margin: auto 0;
     }
 
-    .s7-col {
-      background: var(--bg-dark-card);
-      border: 1px solid var(--border-dark);
-      border-radius: 20px;
+    .spec-column-box {
+      background: rgba(13, 20, 38, 0.75);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
       padding: 2.5rem;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
     }
 
-    .s7-col-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #FFFFFF;
-      margin-bottom: 1.5rem;
+    .spec-col-header {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.8rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .s7-stack-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .s7-stack-item {
+    .spec-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding-bottom: 1rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
-    .s7-stack-item:last-child {
+    .spec-row:last-child {
       border-bottom: none;
-      padding-bottom: 0;
     }
 
-    .s7-stack-label {
+    .spec-key {
       font-weight: 600;
-      color: #F8FAFC;
+      color: var(--text-sub);
       font-size: 0.95rem;
     }
 
-    .s7-stack-value {
+    .spec-val {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
-      color: var(--accent-teal-light);
+      color: var(--neon-cyan);
       text-align: right;
       max-width: 60%;
     }
 
-    .s7-bottom-bar {
-      background: var(--accent-coral);
+    .delivery-cta-bar {
+      background: linear-gradient(90deg, #FF5A36, #FF2D55);
       color: white;
-      border-radius: 14px;
-      padding: 1.25rem 2rem;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.15rem;
-      font-weight: 700;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(255, 90, 54, 0.3);
+      border-radius: 16px;
+      padding: 1.25rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 15px 35px rgba(255, 90, 54, 0.35);
+    }
+
+    .cta-text-bold {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
     }
 
     /* ==========================================================================
-       PRESENTER CONTROLS & HUD
+       PRESENTER CONTROLLER HUD & CONTROLS
        ========================================================================== */
     #deck-hud {
       position: fixed;
-      bottom: 1.75rem;
-      right: 2.5rem;
+      bottom: 2rem;
+      right: 3rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 0.5rem 0.85rem;
+      background: rgba(13, 20, 38, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 0.6rem 1rem;
       border-radius: 9999px;
-      color: white;
-      z-index: 100;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     }
 
-    .hud-btn {
+    .hud-control-btn {
       background: transparent;
       border: none;
-      color: #94A3B8;
+      color: var(--text-muted);
       cursor: pointer;
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
       transition: all 200ms ease;
     }
 
-    .hud-btn:hover {
-      color: white;
+    .hud-control-btn:hover {
+      color: #FFFFFF;
       background: rgba(255, 255, 255, 0.1);
     }
 
-    .hud-counter {
+    .hud-counter-text {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #FFFFFF;
       padding: 0 0.5rem;
-      color: #F8FAFC;
     }
 
-    #progress-bar {
+    .key-shortcuts-badge {
       position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      background: var(--accent-coral);
-      width: 0%;
-      z-index: 200;
-      transition: width 400ms var(--ease-fluid);
-    }
-
-    /* KEYBOARD SHORTCUTS HINT */
-    .keys-hint {
-      position: fixed;
-      bottom: 1.75rem;
-      left: 2.5rem;
+      bottom: 2rem;
+      left: 3rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      color: #64748B;
-      z-index: 100;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(8px);
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(13, 20, 38, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      z-index: 1000;
     }
 
     kbd {
       background: rgba(255, 255, 255, 0.12);
-      padding: 0.15rem 0.35rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.2rem 0.45rem;
       border-radius: 4px;
-      color: #CBD5E1;
+      color: #FFFFFF;
+      font-weight: 600;
     }
 
-    /* REDUCED MOTION SUPPORT */
+    /* REDUCED MOTION PREFERENCES */
     @media (prefers-reduced-motion: reduce) {
-      .slide, .stagger-item, #progress-bar, .s1-tile, .s2-card {
+      .slide, .stagger-in, #progress-fill, .tech-card, .circuit-node {
         transition: none !important;
         animation: none !important;
       }
@@ -844,7 +1022,7 @@
         opacity: 1 !important;
         transform: none !important;
       }
-      .slide.active .stagger-item {
+      .slide.active .stagger-in {
         opacity: 1 !important;
         transform: none !important;
       }
@@ -853,548 +1031,698 @@
 </head>
 <body>
 
-  <!-- Top Progress Indicator -->
-  <div id="progress-bar"></div>
+  <!-- Background Dynamic Mesh Canvas -->
+  <canvas id="ambient-canvas"></canvas>
+  <div class="grid-matrix"></div>
 
-  <!-- Keyboard Shortcuts Tag -->
-  <div class="keys-hint">
-    Use <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>Space</kbd> &bull; <kbd>F</kbd> for fullscreen
+  <!-- Top Real-time Progress Bar -->
+  <div id="progress-track">
+    <div id="progress-fill"></div>
   </div>
 
-  <!-- Stage -->
-  <div id="deck-stage">
-    <div class="slide-viewport">
+  <!-- Keyboard Shortcuts Badge -->
+  <div class="key-shortcuts-badge">
+    <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>Space</kbd> &bull; <kbd>F</kbd> Fullscreen &bull; <kbd>1-7</kbd> Jump
+  </div>
 
-      <!-- ====================================================================
-           SLIDE 01: TITLE
-           ==================================================================== -->
-      <section class="slide theme-dark active" data-slide="1">
+  <!-- DECK VIEWPORT -->
+  <main id="deck-viewport">
+
+    <!-- ====================================================================
+         SLIDE 01: HERO / AUTONOMOUS CREATIVE ENGINE
+         ==================================================================== -->
+    <section class="slide active" data-slide="1">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>VariantForge AI &bull; Production v3.2</span>
+        </div>
+      </div>
+
+      <div class="hero-split">
         <div>
-          <span class="slide-badge stagger-item stagger-delay-1">VariantForge AI</span>
+          <h1 class="slide-headline stagger-in delay-2">
+            The Autonomous <br>
+            <span class="gradient-text-coral">Creative Redesign Engine</span><br>
+            for Growth Teams
+          </h1>
+          <p class="slide-subheadline stagger-in delay-3">
+            An end-to-end multi-platform intelligence system transforming raw product photos or underperforming ads into high-converting, localized ad campaigns at scale.
+          </p>
+
+          <div class="hero-stats-row stagger-in delay-4">
+            <div class="hero-stat-card">
+              <div class="stat-number gradient-text-cyan">16 &times;</div>
+              <div class="stat-label">Creatives per Batch</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="stat-number gradient-text-emerald">&lt; 45s</div>
+              <div class="stat-label">End-to-End Latency</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="stat-number gradient-text-coral">100%</div>
+              <div class="stat-label">VRAM Leak-Proof</div>
+            </div>
+          </div>
         </div>
 
-        <div class="s1-container">
+        <div class="hero-visual-stage stagger-in delay-3">
+          <div class="orb-glow"></div>
+          <div class="holo-cube-wrapper">
+            <div class="holo-card c-one">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <span>SDXL Inpaint</span>
+            </div>
+            <div class="holo-card c-two">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/></svg>
+              <span>ControlNet</span>
+            </div>
+            <div class="holo-card c-three">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <span>RMBG Alpha</span>
+            </div>
+            <div class="holo-card c-four">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>OCR Layout</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer-bar stagger-in delay-5">
+        <span>Ashrit-Raghupatruni / Variant-forge &bull; Branch: main</span>
+        <span>01 / 07</span>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 02: CAPABILITIES MATRIX
+         ==================================================================== -->
+    <section class="slide" data-slide="2">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>Core Capabilities</span>
+        </div>
+        <h2 class="slide-headline stagger-in delay-2">
+          One Platform. <span class="gradient-text-cyan">Unlimited Creative Production.</span>
+        </h2>
+        <p class="slide-subheadline stagger-in delay-3">
+          Eliminating fragmented creative workflows with a single unified, model-agnostic operating canvas.
+        </p>
+      </div>
+
+      <div class="cards-4-grid">
+        <div class="tech-card stagger-in delay-2">
           <div>
-            <h1 class="slide-title stagger-item stagger-delay-2" style="font-size: 3.25rem;">
-              A multi-platform creative editor and AI redesign system for growth marketing teams
-            </h1>
-            <p class="slide-subtitle stagger-item stagger-delay-3" style="margin-top: 1.5rem;">
-              High-throughput visual production engine unifying text extraction, layout audit, SDXL inpainting, ControlNet edge preservation, and automated multi-channel campaign generation.
+            <div class="card-icon-bubble">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--neon-coral)" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h3 class="card-title">AI Redesign Studio</h3>
+            <p class="card-body">
+              Deconstructs live competitor ads, extracts brand typography, isolates key subjects, and synthesizes 3 brand-new high-CTR aesthetic variations.
             </p>
-            <div class="s1-repo-pill stagger-item stagger-delay-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-              <span>ashriths/GENAI &bull; main</span>
-            </div>
           </div>
+          <span class="card-chip badge-coral">Qwen2.5-VL + SDXL</span>
+        </div>
 
-          <div class="s1-emblem-wrapper stagger-item stagger-delay-3">
-            <div class="s1-emblem-glow"></div>
-            <div class="s1-emblem">
-              <div class="s1-tile s1-tile-coral"></div>
-              <div class="s1-tile s1-tile-teal"></div>
-              <div class="s1-tile s1-tile-cream"></div>
-              <div class="s1-tile s1-tile-dark"></div>
+        <div class="tech-card stagger-in delay-3">
+          <div>
+            <div class="card-icon-bubble">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             </div>
+            <h3 class="card-title">Campaign Matrix</h3>
+            <p class="card-body">
+              Batch generation across 4 distinct ad aspect ratios (1:1, 9:16, 16:9, 4:5) and 4 creative backdrops with perfect safe-zone margins.
+            </p>
           </div>
+          <span class="card-chip badge-cyan">1 Photo &rarr; 16 Assets</span>
         </div>
 
-        <div class="slide-footer stagger-item stagger-delay-5">
-          <span>Production Architecture &bull; 2026</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 01 / 07</span>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           SLIDE 02: WHAT IT DOES
-           ==================================================================== -->
-      <section class="slide theme-light" data-slide="2">
-        <div>
-          <span class="slide-badge stagger-item stagger-delay-1">WHAT IT DOES</span>
-          <h2 class="slide-title stagger-item stagger-delay-2">One platform for creative production</h2>
-          <p class="slide-subtitle stagger-item stagger-delay-3">
-            From a single product photo or an existing creative to fully localized, multi-platform ad campaigns in seconds.
-          </p>
+        <div class="tech-card stagger-in delay-4">
+          <div>
+            <div class="card-icon-bubble">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--neon-teal)" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+            <h3 class="card-title">Structural Control</h3>
+            <p class="card-body">
+              ControlNet SDXL Canny edge preservation prevents product shape drift, while interactive canvas masking enables surgical spot inpainting.
+            </p>
+          </div>
+          <span class="card-chip badge-green">Zero Brand Hallucination</span>
         </div>
 
-        <div class="s2-grid">
-          <div class="s2-card stagger-item stagger-delay-2">
+        <div class="tech-card stagger-in delay-5">
+          <div>
+            <div class="card-icon-bubble">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--neon-violet)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <h3 class="card-title">Global Localization</h3>
+            <p class="card-body">
+              Multi-lingual copy translation across EN, ES, DE, FR, JA with auto-fitting dynamic typography and regional currency badge formatting.
+            </p>
+          </div>
+          <span class="card-chip badge-violet">Auto-Fit Font Engine</span>
+        </div>
+      </div>
+
+      <div class="slide-footer-bar stagger-in delay-6">
+        <span>Strategic Value Proposition</span>
+        <span>02 / 07</span>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 03: ARCHITECTURE & DECOUPLED STREAMING
+         ==================================================================== -->
+    <section class="slide" data-slide="3">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>System Topology</span>
+        </div>
+        <h2 class="slide-headline stagger-in delay-2">
+          Asynchronous, Decoupled <span class="gradient-text-emerald">3-Tier Architecture</span>
+        </h2>
+        <p class="slide-subheadline stagger-in delay-3">
+          Engineered for fault tolerance: client interactivity never halts while heavy neural networks process on remote GPU clusters.
+        </p>
+      </div>
+
+      <div class="topology-container">
+        <div class="topo-tier stagger-in delay-2">
+          <div class="topo-tier-header">
             <div>
-              <span class="s2-card-num">01</span>
-              <h3 class="s2-card-title">AI redesign</h3>
-              <p class="s2-card-desc">
-                Upload any existing ad or creative. The system audits layout, extracts copy, isolates subjects, and generates 3 distinct strategic redesigns.
-              </p>
+              <span class="tier-badge">CLIENT LAYER</span>
+              <h3 class="tier-title">Interactive Studio</h3>
             </div>
-            <span class="s2-card-tag">Qwen-VL + SDXL</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
+          <ul class="topo-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> HTML5 Dual-Canvas Masking Brush</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Interactive Redesign Comparison</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Real-Time Job Progress Polling</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Instant Client-Side Zip Extractor</li>
+          </ul>
+          <span class="card-chip badge-cyan">Zero UI Thread Blocking</span>
+        </div>
 
-          <div class="s2-card stagger-item stagger-delay-3">
+        <div class="stream-bridge stagger-in delay-3">
+          <span class="stream-label">REST / WS</span>
+          <div class="stream-line"></div>
+        </div>
+
+        <div class="topo-tier stagger-in delay-3">
+          <div class="topo-tier-header">
             <div>
-              <span class="s2-card-num">02</span>
-              <h3 class="s2-card-title">Campaign matrix</h3>
-              <p class="s2-card-desc">
-                One product photo in, 16 production-ready creatives out: 4 distinct visual backdrops across 4 key ad aspect ratios, completely automated.
-              </p>
+              <span class="tier-badge" style="color: var(--neon-violet);">ORCHESTRATOR</span>
+              <h3 class="tier-title">FastAPI Core</h3>
             </div>
-            <span class="s2-card-tag">1:1 &bull; 9:16 &bull; 16:9 &bull; 4:5</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-violet)" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
           </div>
+          <ul class="topo-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Non-Blocking Async Job Manager</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Pillow Vector Compositing Pipeline</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Automatic CPU Offline Mock Engine</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Secure Multipart Cloudflare Proxy</li>
+          </ul>
+          <span class="card-chip badge-violet">Pydantic v2 &bull; Python 3.10+</span>
+        </div>
 
-          <div class="s2-card stagger-item stagger-delay-4">
+        <div class="stream-bridge stagger-in delay-4">
+          <span class="stream-label">TUNNEL</span>
+          <div class="stream-line"></div>
+        </div>
+
+        <div class="topo-tier stagger-in delay-4">
+          <div class="topo-tier-header">
             <div>
-              <span class="s2-card-num">03</span>
-              <h3 class="s2-card-title">Smart editing</h3>
-              <p class="s2-card-desc">
-                Interactive canvas studio featuring brush-based SDXL inpainting, ControlNet Canny edge guidance, and one-click salient object isolation.
-              </p>
+              <span class="tier-badge" style="color: var(--neon-teal);">INFERENCE</span>
+              <h3 class="tier-title">Remote GPU Worker</h3>
             </div>
-            <span class="s2-card-tag">Interactive Canvas</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-teal)" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          </div>
+          <ul class="topo-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> SDXL Inpainting (Attention Slicing)</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> ControlNet Canny Preprocessing</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> BRIA RMBG-2.0 / U2Net Cutout</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> EasyOCR GPU Coordinate Detection</li>
+          </ul>
+          <span class="card-chip badge-green">T4 / A100 &bull; CUDA 12</span>
+        </div>
+      </div>
+
+      <div class="banner-callout stagger-in delay-5">
+        <div class="banner-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <span><strong>Zero-Auth Worker Protocol:</strong> Engineered without brittle external Hugging Face tokens to permanently prevent 403 authorization failures on shared worker instances.</span>
+      </div>
+
+      <div class="slide-footer-bar stagger-in delay-6">
+        <span>Distributed Architecture Overview</span>
+        <span>03 / 07</span>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 04: NEURAL STACK & VRAM OPTIMIZATION
+         ==================================================================== -->
+    <section class="slide" data-slide="4">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>Inference Engineering</span>
+        </div>
+        <h2 class="slide-headline stagger-in delay-2">
+          The Neural Model Stack: <span class="gradient-text-coral">Purpose-Built per Stage</span>
+        </h2>
+        <p class="slide-subheadline stagger-in delay-3">
+          Multi-model orchestration running concurrently on a constrained 16GB VRAM footprint using dynamic memory lifecycle management.
+        </p>
+      </div>
+
+      <div class="neural-table-box stagger-in delay-3">
+        <table class="neural-table">
+          <thead>
+            <tr>
+              <th>Pipeline Phase</th>
+              <th>Deployed Engine</th>
+              <th>Operational Function</th>
+              <th>Optimization Strategy</th>
+              <th>Compute Target</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: #FFFFFF;">01 Visual Audit</strong></td>
+              <td><span class="model-badge badge-coral">Qwen2.5-VL / Gemini Vision</span></td>
+              <td>Analyzes layout hierarchy, contrast scores, and CTA prominence</td>
+              <td>Structured JSON prompt schema</td>
+              <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">Cloud API</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color: #FFFFFF;">02 Text Extraction</strong></td>
+              <td><span class="model-badge badge-green">EasyOCR / PaddleOCR</span></td>
+              <td>Detects bounding polygons, font orientation, and textual copy</td>
+              <td>GPU-accelerated matrix transforms</td>
+              <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">CUDA Worker</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color: #FFFFFF;">03 Salient Cutout</strong></td>
+              <td><span class="model-badge badge-cyan">BRIA RMBG-2.0 / U2Net</span></td>
+              <td>Extracts foreground product with sub-pixel alpha transparency</td>
+              <td>Zero-auth standalone weights session</td>
+              <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">CUDA Worker</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color: #FFFFFF;">04 Edge Preservation</strong></td>
+              <td><span class="model-badge badge-violet">ControlNet Canny SDXL</span></td>
+              <td>Locks geometry edges to prevent structural distortion during inpainting</td>
+              <td>Attention slicing & fp16 precision</td>
+              <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">CUDA Worker</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color: #FFFFFF;">05 Scene Inpainting</strong></td>
+              <td><span class="model-badge badge-coral">SDXL Inpainting 1.0</span></td>
+              <td>Synthesizes photorealistic themed backdrops around product bounds</td>
+              <td>Sequential offload & empty_cache()</td>
+              <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">CUDA Worker</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color: #FFFFFF;">06 Compositing & ZIP</strong></td>
+              <td><span class="model-badge badge-green">Pillow + OpenCV Engine</span></td>
+              <td>Renders multi-ratio crops, vector text banners, and compresses package</td>
+              <td>Multithreaded vector draw ops</td>
+              <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">Backend CPU</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="slide-footer-bar stagger-in delay-4">
+        <span>VRAM Optimization: Auto-unloading unneeded models ensures peak consumption never exceeds 11.2 GB</span>
+        <span>04 / 07</span>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 05: AUTONOMOUS REDESIGN FLOW (Process 1)
+         ==================================================================== -->
+    <section class="slide" data-slide="5">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>Pipeline In-Depth &bull; Process 1</span>
+        </div>
+        <h2 class="slide-headline stagger-in delay-2">
+          Autonomous Ad Redesign: <span class="gradient-text-cyan">Input to 3 Strategic Directions</span>
+        </h2>
+        <p class="slide-subheadline stagger-in delay-3">
+          How VariantForge AI deconstructs an ad and engineers 3 market-ready visual variations in seconds.
+        </p>
+      </div>
+
+      <div class="circuit-6-grid">
+        <div class="circuit-node stagger-in delay-2">
+          <div>
+            <span class="node-idx">01</span>
+            <h3 class="node-title">OCR Scan</h3>
+            <p class="node-desc">Reads headline, subcopy, and CTA with exact spatial coordinates.</p>
+          </div>
+          <span class="node-pill">EasyOCR</span>
+        </div>
+
+        <div class="circuit-node stagger-in delay-3">
+          <div>
+            <span class="node-idx">02</span>
+            <h3 class="node-title">Design Audit</h3>
+            <p class="node-desc">Vision LLM analyzes conversion flaws, color conflict, and layout clutter.</p>
+          </div>
+          <span class="node-pill">Vision LLM</span>
+        </div>
+
+        <div class="circuit-node stagger-in delay-4">
+          <div>
+            <span class="node-idx">03</span>
+            <h3 class="node-title">Isolate Hero</h3>
+            <p class="node-desc">Generates a razor-sharp transparent cutout of the central product.</p>
+          </div>
+          <span class="node-pill">U2Net RMBG</span>
+        </div>
+
+        <div class="circuit-node stagger-in delay-5">
+          <div>
+            <span class="node-idx">04</span>
+            <h3 class="node-title">3 Directions</h3>
+            <p class="node-desc">SDXL synthesizes Studio Minimal, Lifestyle, and High-Energy scenes.</p>
+          </div>
+          <span class="node-pill">SDXL Diffusion</span>
+        </div>
+
+        <div class="circuit-node stagger-in delay-6">
+          <div>
+            <span class="node-idx">05</span>
+            <h3 class="node-title">Rebuild</h3>
+            <p class="node-desc">Re-renders typography with optimal safe-zones, contrast, and badges.</p>
+          </div>
+          <span class="node-pill">Pillow Vector</span>
+        </div>
+
+        <div class="circuit-node stagger-in delay-7">
+          <div>
+            <span class="node-idx">06</span>
+            <h3 class="node-title">Deliver</h3>
+            <p class="node-desc">Interactive before/after review or instant download bundle.</p>
+          </div>
+          <span class="node-pill">Ready to Run</span>
+        </div>
+      </div>
+
+      <div class="slide-footer-bar stagger-in delay-7">
+        <span>From Single Creative to Multi-Variant Growth Testing</span>
+        <span>05 / 07</span>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 06: CAMPAIGN MATRIX (Process 2)
+         ==================================================================== -->
+    <section class="slide" data-slide="6">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>Pipeline In-Depth &bull; Process 2</span>
+        </div>
+        <h2 class="slide-headline stagger-in delay-2">
+          Campaign Matrix: <span class="gradient-text-coral">1 Product Photo &rarr; 16 Production Assets</span>
+        </h2>
+        <p class="slide-subheadline stagger-in delay-3">
+          Instant multi-channel ad scaling with automatic layout reflow and backdrop generation.
+        </p>
+      </div>
+
+      <div class="matrix-layout">
+        <div class="matrix-showcase-grid stagger-in delay-3">
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">STYLE A &bull; 1:1</span>
+            <h4 class="matrix-tile-name">Studio Minimal</h4>
+            <p class="matrix-tile-desc">Clean neutral podium with soft studio rim lighting for Instagram feeds.</p>
+          </div>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">STYLE B &bull; 9:16</span>
+            <h4 class="matrix-tile-name">Cyber Neon</h4>
+            <p class="matrix-tile-desc">Vibrant reflective cyberpunk grid for TikTok and Reels stories.</p>
+          </div>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">STYLE C &bull; 16:9</span>
+            <h4 class="matrix-tile-name">Natural Organic</h4>
+            <p class="matrix-tile-desc">Earthy botanical sunlight backdrop for YouTube & display banners.</p>
+          </div>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">STYLE D &bull; 4:5</span>
+            <h4 class="matrix-tile-name">Luxury Editorial</h4>
+            <p class="matrix-tile-desc">Dark textured marble and dramatic shadows for premium campaigns.</p>
           </div>
 
-          <div class="s2-card stagger-item stagger-delay-5">
-            <div>
-              <span class="s2-card-num">04</span>
-              <h3 class="s2-card-title">Localization</h3>
-              <p class="s2-card-desc">
-                Instant translation of headline copy across 5 languages with automatic font size fitting and currency symbol substitution.
-              </p>
-            </div>
-            <span class="s2-card-tag">Multi-Market Ready</span>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">DIMENSION 01</span>
+            <h4 class="matrix-tile-name">1080 &times; 1080</h4>
+            <p class="matrix-tile-desc">Meta & LinkedIn square format with centered focus.</p>
           </div>
-        </div>
-
-        <div class="slide-footer stagger-item stagger-delay-6">
-          <span>VariantForge AI &bull; Core Capabilities</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 02 / 07</span>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           SLIDE 03: HOW IT WORKS - ARCHITECTURE
-           ==================================================================== -->
-      <section class="slide theme-light" data-slide="3">
-        <div>
-          <span class="slide-badge stagger-item stagger-delay-1">HOW IT WORKS</span>
-          <h2 class="slide-title stagger-item stagger-delay-2">End-to-end decoupled system architecture</h2>
-          <p class="slide-subtitle stagger-item stagger-delay-3">
-            A 3-tier production pipeline separating interactive client state from asynchronous GPU compute.
-          </p>
-        </div>
-
-        <div class="s3-flow">
-          <div class="s3-box stagger-item stagger-delay-2">
-            <div class="s3-box-header">
-              <span class="s3-box-role">TIER 01</span>
-              <h3 class="s3-box-name">FRONTEND</h3>
-            </div>
-            <ul class="s3-items">
-              <li>Unified creative canvas studio</li>
-              <li>Interactive mask brush engine</li>
-              <li>Multi-asset campaign matrix viewer</li>
-              <li>Real-time layer management</li>
-            </ul>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748B;">HTML5 Canvas &bull; Tailwind &bull; JS</span>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">DIMENSION 02</span>
+            <h4 class="matrix-tile-name">1080 &times; 1920</h4>
+            <p class="matrix-tile-desc">Full vertical screen with top/bottom safe-margin spacing.</p>
           </div>
-
-          <div class="s3-arrow stagger-item stagger-delay-3">&rarr;</div>
-
-          <div class="s3-box stagger-item stagger-delay-3">
-            <div class="s3-box-header">
-              <span class="s3-box-role">TIER 02</span>
-              <h3 class="s3-box-name">BACKEND</h3>
-            </div>
-            <ul class="s3-items">
-              <li>FastAPI asynchronous orchestrator</li>
-              <li>In-memory job management queue</li>
-              <li>Multi-format Pillow compositor</li>
-              <li>Safe fallback mock generators</li>
-            </ul>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748B;">Python 3.10+ &bull; FastAPI &bull; Uvicorn</span>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">DIMENSION 03</span>
+            <h4 class="matrix-tile-name">1920 &times; 1080</h4>
+            <p class="matrix-tile-desc">Landscape banner format with left-aligned typographic copy.</p>
           </div>
-
-          <div class="s3-arrow stagger-item stagger-delay-4">&rarr;</div>
-
-          <div class="s3-box stagger-item stagger-delay-4">
-            <div class="s3-box-header">
-              <span class="s3-box-role">TIER 03</span>
-              <h3 class="s3-box-name">ML WORKER</h3>
-            </div>
-            <ul class="s3-items">
-              <li>SDXL Inpainting (Diffusers fp16)</li>
-              <li>ControlNet Canny edge preservation</li>
-              <li>BRIA RMBG / U2Net cutout engine</li>
-              <li>PaddleOCR / EasyOCR on CUDA</li>
-            </ul>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748B;">PyTorch &bull; CUDA 12 &bull; Cloudflare Tunnel</span>
-          </div>
-        </div>
-
-        <div class="s3-callout stagger-item stagger-delay-5">
-          <span class="s3-callout-badge">Async by Design</span>
-          <span>Heavy diffusion and vision tasks run as non-blocking background jobs with polling and WebSocket streaming. The UI never freezes.</span>
-        </div>
-
-        <div class="slide-footer stagger-item stagger-delay-6">
-          <span>Decoupled Architecture &bull; Scalable GPU Inference</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 03 / 07</span>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           SLIDE 04: THE AI MODEL STACK
-           ==================================================================== -->
-      <section class="slide theme-light" data-slide="4">
-        <div>
-          <span class="slide-badge stagger-item stagger-delay-1">HOW IT WORKS</span>
-          <h2 class="slide-title stagger-item stagger-delay-2">The AI model stack: purpose-built per pipeline stage</h2>
-          <p class="slide-subtitle stagger-item stagger-delay-3">
-            Every pipeline stage is mapped to a specialized, open-weights or foundation model for maximum performance.
-          </p>
-        </div>
-
-        <div class="s4-table-card stagger-item stagger-delay-3">
-          <table class="s4-table">
-            <thead>
-              <tr>
-                <th>Stage</th>
-                <th>Model / Engine</th>
-                <th>Role & Execution</th>
-                <th>Target Hardware</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Design Audit</strong></td>
-                <td><span class="s4-model-tag">Qwen2.5-VL / Gemini Vision</span></td>
-                <td>Analyzes visual hierarchy, color palette, typography and copy</td>
-                <td><span class="s4-engine-tag">Cloud API / Worker</span></td>
-              </tr>
-              <tr>
-                <td><strong>Text Extraction</strong></td>
-                <td><span class="s4-model-tag">PaddleOCR / EasyOCR</span></td>
-                <td>Extracts text bounding boxes and content for editing & re-styling</td>
-                <td><span class="s4-engine-tag">CUDA GPU / CPU</span></td>
-              </tr>
-              <tr>
-                <td><strong>Image Generation</strong></td>
-                <td><span class="s4-model-tag">SDXL / FLUX.2 Klein 4B</span></td>
-                <td>Generates photorealistic themed backdrops from text prompts</td>
-                <td><span class="s4-engine-tag">T4 / A100 GPU</span></td>
-              </tr>
-              <tr>
-                <td><strong>Background Removal</strong></td>
-                <td><span class="s4-model-tag">BRIA RMBG-2.0 / U2Net</span></td>
-                <td>Isolates foreground product with high-precision alpha mask</td>
-                <td><span class="s4-engine-tag">CUDA GPU</span></td>
-              </tr>
-              <tr>
-                <td><strong>Edge Preservation</strong></td>
-                <td><span class="s4-model-tag">ControlNet SDXL Canny</span></td>
-                <td>Preserves structural product geometry during AI synthesis</td>
-                <td><span class="s4-engine-tag">CUDA GPU</span></td>
-              </tr>
-              <tr>
-                <td><strong>Layout & Export</strong></td>
-                <td><span class="s4-model-tag">OpenCV & Pillow</span></td>
-                <td>Text rendering, multi-platform cropping, ZIP packaging</td>
-                <td><span class="s4-engine-tag">FastAPI Core CPU</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="s4-note stagger-item stagger-delay-4">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-          <span>Dynamic VRAM manager unloads idle models between pipeline stages, enabling full multi-model inference on a single 16GB T4 GPU.</span>
-        </div>
-
-        <div class="slide-footer stagger-item stagger-delay-5">
-          <span>AI Foundation Stack &bull; GPU Memory Optimization</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 04 / 07</span>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           SLIDE 05: PROCESS 1 · REDESIGN
-           ==================================================================== -->
-      <section class="slide theme-light" data-slide="5">
-        <div>
-          <span class="slide-badge stagger-item stagger-delay-1">PROCESS 1 &bull; REDESIGN</span>
-          <h2 class="slide-title stagger-item stagger-delay-2">AI image redesign: from creative to 3 strategic directions</h2>
-          <p class="slide-subtitle stagger-item stagger-delay-3">
-            Ingest an existing high-performing ad, deconstruct it, and synthesize three distinct aesthetic directions.
-          </p>
-        </div>
-
-        <div class="s5-grid">
-          <div class="s5-step-card stagger-item stagger-delay-2">
-            <div>
-              <span class="s5-step-num">01</span>
-              <h3 class="s5-step-title">Extract text</h3>
-              <p class="s5-step-desc">
-                PaddleOCR detects headline, body, and CTA copy with exact bounding coordinates.
-              </p>
-            </div>
-            <span class="s5-badge">PaddleOCR</span>
-          </div>
-
-          <div class="s5-step-card stagger-item stagger-delay-3">
-            <div>
-              <span class="s5-step-num">02</span>
-              <h3 class="s5-step-title">Audit design</h3>
-              <p class="s5-step-desc">
-                Vision LLM evaluates color harmony, hierarchy flaws, and generates structured redesign briefs.
-              </p>
-            </div>
-            <span class="s5-badge">Qwen-VL</span>
-          </div>
-
-          <div class="s5-step-card stagger-item stagger-delay-4">
-            <div>
-              <span class="s5-step-num">03</span>
-              <h3 class="s5-step-title">Isolate product</h3>
-              <p class="s5-step-desc">
-                RMBG-2.0 separates the core subject from background noise with clean sub-pixel alpha edges.
-              </p>
-            </div>
-            <span class="s5-badge">RMBG-2.0</span>
-          </div>
-
-          <div class="s5-step-card stagger-item stagger-delay-5">
-            <div>
-              <span class="s5-step-num">04</span>
-              <h3 class="s5-step-title">3 directions</h3>
-              <p class="s5-step-desc">
-                SDXL generates Minimalist Studio, Lifestyle Contextual, and Bold High-Contrast backdrops.
-              </p>
-            </div>
-            <span class="s5-badge">SDXL Inpaint</span>
-          </div>
-
-          <div class="s5-step-card stagger-item stagger-delay-6">
-            <div>
-              <span class="s5-step-num">05</span>
-              <h3 class="s5-step-title">Rebuild layout</h3>
-              <p class="s5-step-desc">
-                Pillow compositor re-renders typography, applies drop shadows, and positions badges.
-              </p>
-            </div>
-            <span class="s5-badge">Pillow Engine</span>
-          </div>
-
-          <div class="s5-step-card stagger-item stagger-delay-7">
-            <div>
-              <span class="s5-step-num">06</span>
-              <h3 class="s5-step-title">Deliver</h3>
-              <p class="s5-step-desc">
-                Review in interactive side-by-side comparison studio or export production bundles.
-              </p>
-            </div>
-            <span class="s5-badge">ZIP Export</span>
+          <div class="matrix-tile">
+            <span class="matrix-tile-num">DIMENSION 04</span>
+            <h4 class="matrix-tile-name">1080 &times; 1350</h4>
+            <p class="matrix-tile-desc">High-engagement 4:5 portrait format for maximum mobile feed real estate.</p>
           </div>
         </div>
 
-        <div class="slide-footer stagger-item stagger-delay-7">
-          <span>AI Redesign Flow &bull; 6 Automated Steps</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 05 / 07</span>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           SLIDE 06: PROCESS 2 · CAMPAIGN MATRIX
-           ==================================================================== -->
-      <section class="slide theme-light" data-slide="6">
-        <div>
-          <span class="slide-badge stagger-item stagger-delay-1">PROCESS 2 &bull; CAMPAIGN MATRIX</span>
-          <h2 class="slide-title stagger-item stagger-delay-2">One photo to 16 ready-to-post creatives</h2>
-          <p class="slide-subtitle stagger-item stagger-delay-3">
-            Scale product launches across all major paid media channels in a single automated batch run.
-          </p>
-        </div>
-
-        <div class="s6-layout">
-          <div class="s6-steps">
-            <div class="s6-mini-card stagger-item stagger-delay-2">
-              <span class="s6-mini-num">01</span>
-              <h4 class="s6-mini-title">Analyze</h4>
-              <p class="s6-mini-desc">Vision audit identifies brand tones, category, and subject bounds.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-3">
-              <span class="s6-mini-num">02</span>
-              <h4 class="s6-mini-title">Cut out</h4>
-              <p class="s6-mini-desc">Automated transparent alpha cutout of the product.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-4">
-              <span class="s6-mini-num">03</span>
-              <h4 class="s6-mini-title">Prompt Backdrops</h4>
-              <p class="s6-mini-desc">Generates tailored scene prompts matching product aesthetics.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-5">
-              <span class="s6-mini-num">04</span>
-              <h4 class="s6-mini-title">4 Visual Styles</h4>
-              <p class="s6-mini-desc">Studio Minimal &bull; Cyber Neon &bull; Natural Organic &bull; Luxury Editorial.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-3">
-              <span class="s6-mini-num">05</span>
-              <h4 class="s6-mini-title">4 Aspect Ratios</h4>
-              <p class="s6-mini-desc">1:1 Square &bull; 9:16 Story/Reels &bull; 16:9 Landscape &bull; 4:5 Feed.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-4">
-              <span class="s6-mini-num">06</span>
-              <h4 class="s6-mini-title">Localize Copy</h4>
-              <p class="s6-mini-desc">Translates headlines into target languages and currencies.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-5">
-              <span class="s6-mini-num">07</span>
-              <h4 class="s6-mini-title">Brand Text</h4>
-              <p class="s6-mini-desc">Overlays high-legibility typographic CTA banners.</p>
-            </div>
-            <div class="s6-mini-card stagger-item stagger-delay-6">
-              <span class="s6-mini-num">08</span>
-              <h4 class="s6-mini-title">ZIP Package</h4>
-              <p class="s6-mini-desc">One-click structured ZIP export containing all 16 assets.</p>
-            </div>
+        <div class="matrix-power-card stagger-in delay-4">
+          <div>
+            <div class="power-stat-giant">16</div>
+            <h3 class="power-label">Assets in &lt; 45 Seconds</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
+              Generated entirely in a single background async job without manual resizing.
+            </p>
           </div>
 
-          <div class="s6-hero-card stagger-item stagger-delay-4">
-            <div>
-              <span class="s6-hero-stat">16</span>
-              <h3 class="s6-hero-title">Ready-to-Post Creatives</h3>
-              <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 0.5rem;">
-                Generated in under 45 seconds on a remote T4 GPU worker.
-              </p>
+          <div class="power-spec-list">
+            <div class="power-spec-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>4 Backdrops &times; 4 Dimensions</span>
             </div>
+            <div class="power-spec-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Automated Safe-Zone Text Fit</span>
+            </div>
+            <div class="power-spec-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Lossless WebP & PNG Bundling</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <div class="s6-specs">
-              <div class="s6-spec-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>4 Styles &times; 4 Dimensions</span>
-              </div>
-              <div class="s6-spec-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Full safe-zone text placement</span>
-              </div>
-              <div class="s6-spec-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Production ready 300 DPI exports</span>
-              </div>
+      <div class="slide-footer-bar stagger-in delay-5">
+        <span>High-Throughput Campaign Generation Engine</span>
+        <span>06 / 07</span>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 07: ENTERPRISE DELIVERY & CONCLUSION
+         ==================================================================== -->
+    <section class="slide" data-slide="7">
+      <div>
+        <div class="badge-pill stagger-in delay-1">
+          <span class="badge-dot"></span>
+          <span>Production Ready</span>
+        </div>
+        <h2 class="slide-headline stagger-in delay-2">
+          Enterprise Hardening & <span class="gradient-text-coral">Production Verification</span>
+        </h2>
+        <p class="slide-subheadline stagger-in delay-3">
+          Designed from day one to operate reliably in production environments without unexpected cloud crashes.
+        </p>
+      </div>
+
+      <div class="delivery-split">
+        <div class="spec-column-box stagger-in delay-3">
+          <div class="spec-col-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span>Core Software Stack</span>
+          </div>
+          <div>
+            <div class="spec-row">
+              <span class="spec-key">Application Framework</span>
+              <span class="spec-val">FastAPI 0.115+ & Python 3.10+</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Diffusion Architecture</span>
+              <span class="spec-val">Diffusers 0.32+ fp16 Pipeline</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Tunnel Architecture</span>
+              <span class="spec-val">Cloudflare Zero-Trust Quick Tunnels</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Vector Compositor</span>
+              <span class="spec-val">Pillow Dynamic Font Engine</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Client Interface</span>
+              <span class="spec-val">HTML5 Canvas + Tailwind CSS</span>
             </div>
           </div>
         </div>
 
-        <div class="slide-footer stagger-item stagger-delay-7">
-          <span>Batch Creative Engine &bull; 1 Photo to 16 Assets</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 06 / 07</span>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           SLIDE 07: STACK AND DELIVERY
-           ==================================================================== -->
-      <section class="slide theme-dark" data-slide="7">
-        <div>
-          <span class="slide-badge stagger-item stagger-delay-1">STACK AND DELIVERY</span>
-          <h2 class="slide-title stagger-item stagger-delay-2">Production-oriented by design</h2>
-          <p class="slide-subtitle stagger-item stagger-delay-3">
-            Built for reliability, throughput, and sub-second client responsiveness.
-          </p>
-        </div>
-
-        <div class="s7-grid">
-          <div class="s7-col stagger-item stagger-delay-3">
-            <h3 class="s7-col-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-              <span>Tech Stack</span>
-            </h3>
-            <div class="s7-stack-list">
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Frontend</span>
-                <span class="s7-stack-value">HTML5 Canvas, Tailwind, Vanilla JS</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Backend</span>
-                <span class="s7-stack-value">FastAPI, Python 3.10+, Uvicorn</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">ML Framework</span>
-                <span class="s7-stack-value">PyTorch 2.x, Diffusers, EasyOCR</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Image Engine</span>
-                <span class="s7-stack-value">Pillow, NumPy, OpenCV</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Inference Tunnel</span>
-                <span class="s7-stack-value">Cloudflare Zero-Trust Tunnel</span>
-              </div>
-            </div>
+        <div class="spec-column-box stagger-in delay-4">
+          <div class="spec-col-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-teal)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Reliability Safeguards</span>
           </div>
-
-          <div class="s7-col stagger-item stagger-delay-4">
-            <h3 class="s7-col-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-teal-light)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              <span>Quality & Delivery</span>
-            </h3>
-            <div class="s7-stack-list">
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">VRAM Efficiency</span>
-                <span class="s7-stack-value">Zero-leak sequential model offloading</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Job Queue</span>
-                <span class="s7-stack-value">Asynchronous background job worker</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Export Packaging</span>
-                <span class="s7-stack-value">Instant ZIP packaging & download</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Zero Auth Leak</span>
-                <span class="s7-stack-value">No HF token 403 blocks in Colab worker</span>
-              </div>
-              <div class="s7-stack-item">
-                <span class="s7-stack-label">Offline Mocking</span>
-                <span class="s7-stack-value">Automatic CPU fallbacks if GPU is offline</span>
-              </div>
+          <div>
+            <div class="spec-row">
+              <span class="spec-key">Zero 403 Auth Errors</span>
+              <span class="spec-val">Standalone Public Weights</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">VRAM Memory Recovery</span>
+              <span class="spec-val">torch.cuda.ipc_collect() + GC</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Safe CPU Fallbacks</span>
+              <span class="spec-val">Auto-Mocking if Worker Offline</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Timeout Mitigation</span>
+              <span class="spec-val">Asynchronous Non-Blocking Polling</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Packaging Format</span>
+              <span class="spec-val">Auto-Generated ZIP with JSON Manifest</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="s7-bottom-bar stagger-item stagger-delay-5">
-          One product photo in. A full multi-platform campaign out.
-        </div>
+      <div class="delivery-cta-bar stagger-in delay-5">
+        <span class="cta-text-bold">One product photo in. A full multi-platform campaign out.</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: rgba(0,0,0,0.25); padding: 0.4rem 0.8rem; border-radius: 8px;">Ready for Production Testing</span>
+      </div>
 
-        <div class="slide-footer stagger-item stagger-delay-6">
-          <span>VariantForge AI &bull; Production Ready</span>
-          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 07 / 07</span>
-        </div>
-      </section>
+      <div class="slide-footer-bar stagger-in delay-6">
+        <span>VariantForge AI &bull; Autonomous Creative Engine</span>
+        <span>07 / 07</span>
+      </div>
+    </section>
 
-    </div>
-  </div>
+  </main>
 
-  <!-- Bottom Presenter HUD -->
+  <!-- Bottom Interactive HUD -->
   <div id="deck-hud">
-    <button class="hud-btn" id="btn-prev" title="Previous Slide (Left Arrow)">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    <button class="hud-control-btn" id="btn-prev" title="Previous Slide (Left Arrow)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="hud-counter" id="slide-counter">01 / 07</span>
-    <button class="hud-btn" id="btn-next" title="Next Slide (Right Arrow)">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    <span class="hud-counter-text" id="slide-counter">01 / 07</span>
+    <button class="hud-control-btn" id="btn-next" title="Next Slide (Right Arrow / Space)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
-    <button class="hud-btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    <div style="width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+    <button class="hud-control-btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
     </button>
   </div>
 
-  <!-- ========================================================================
-       PRESENTATION CONTROLLER SCRIPT
-       ======================================================================== -->
+  <!-- Ambient Dynamic Particle Mesh Script -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('ambient-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Particle {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.vx = (Math.random() - 0.5) * 0.4;
+          this.vy = (Math.random() - 0.5) * 0.4;
+          this.radius = Math.random() * 2 + 1;
+          this.alpha = Math.random() * 0.5 + 0.2;
+          this.color = Math.random() > 0.5 ? 'rgba(6, 182, 212,' : 'rgba(99, 102, 241,';
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+            this.reset();
+          }
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `${this.color}${this.alpha})`;
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < 45; i++) {
+        particles.push(new Particle());
+      }
+
+      function animateMesh() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 130) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(99, 102, 241, ${0.12 * (1 - dist / 130)})`;
+              ctx.lineWidth = 0.8;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animateMesh);
+      }
+      animateMesh();
+    })();
+  </script>
+
+  <!-- Presentation Runtime Engine -->
   <script>
     (function () {
       const slides = Array.from(document.querySelectorAll('.slide'));
       const counter = document.getElementById('slide-counter');
-      const progressBar = document.getElementById('progress-bar');
+      const progressFill = document.getElementById('progress-fill');
       const btnPrev = document.getElementById('btn-prev');
       const btnNext = document.getElementById('btn-next');
       const btnFullscreen = document.getElementById('btn-fullscreen');
@@ -1407,7 +1735,6 @@
         const currentSlide = slides[currentIndex];
         const nextSlide = slides[newIndex];
 
-        // Animate out current slide
         currentSlide.classList.remove('active');
         if (direction === 'next') {
           currentSlide.classList.add('prev');
@@ -1415,20 +1742,17 @@
           currentSlide.classList.remove('prev');
         }
 
-        // Animate in new slide
         nextSlide.classList.remove('prev');
         nextSlide.classList.add('active');
 
         currentIndex = newIndex;
 
-        // Update Counter & Progress Bar
-        const numStr = String(currentIndex + 1).padStart(2, '0');
-        const totStr = String(totalSlides).padStart(2, '0');
-        counter.textContent = `${numStr} / ${totStr}`;
+        // Counter & Progress
+        counter.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
         const pct = ((currentIndex + 1) / totalSlides) * 100;
-        progressBar.style.width = `${pct}%`;
+        progressFill.style.width = `${pct}%`;
 
-        // Update URL hash without scroll
+        // URL Hash sync
         history.replaceState(null, null, `#${currentIndex + 1}`);
       }
 
@@ -1452,7 +1776,7 @@
         }
       }
 
-      // Keyboard Event Listeners
+      // Keyboard Controls
       window.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
           e.preventDefault();
@@ -1468,15 +1792,19 @@
           updateSlide(totalSlides - 1, 'next');
         } else if (e.key.toLowerCase() === 'f') {
           toggleFullscreen();
+        } else if (e.key >= '1' && e.key <= '7') {
+          const target = parseInt(e.key, 10) - 1;
+          if (target !== currentIndex) {
+            updateSlide(target, target > currentIndex ? 'next' : 'prev');
+          }
         }
       });
 
-      // Button Handlers
       btnNext.addEventListener('click', nextSlide);
       btnPrev.addEventListener('click', prevSlide);
       btnFullscreen.addEventListener('click', toggleFullscreen);
 
-      // Touch / Swipe Navigation
+      // Mobile Touch Gesture Support
       let touchStartX = 0;
       let touchEndX = 0;
 
@@ -1486,19 +1814,11 @@
 
       window.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
-        handleGesture();
+        if (touchEndX < touchStartX - 50) nextSlide();
+        if (touchEndX > touchStartX + 50) prevSlide();
       }, { passive: true });
 
-      function handleGesture() {
-        const threshold = 50;
-        if (touchEndX < touchStartX - threshold) {
-          nextSlide();
-        } else if (touchEndX > touchStartX + threshold) {
-          prevSlide();
-        }
-      }
-
-      // Initial Hash Check
+      // Init Hash
       const hash = parseInt(window.location.hash.replace('#', ''), 10);
       if (!isNaN(hash) && hash >= 1 && hash <= totalSlides) {
         updateSlide(hash - 1, 'next');
