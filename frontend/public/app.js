@@ -10,6 +10,56 @@ let inpaintCanvas = null;
 let inpaintCtx = null;
 let isDrawingMask = false;
 
+// Global Toast Notification Controller (No browser alert popups)
+function showToast(title, message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) {
+    console.log(`[Toast ${type}] ${title}: ${message}`);
+    return;
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `pointer-events-auto flex items-start space-x-3 p-4 rounded-xl shadow-2xl border transition-all duration-300 transform translate-y-2 opacity-0 max-w-sm ${
+    type === 'success' 
+      ? 'bg-slate-900 border-emerald-500/40 text-emerald-300 shadow-emerald-950/50' 
+      : type === 'error'
+      ? 'bg-slate-900 border-rose-500/40 text-rose-300 shadow-rose-950/50'
+      : 'bg-slate-900 border-indigo-500/40 text-indigo-300 shadow-indigo-950/50'
+  }`;
+
+  const iconSvg = type === 'success' 
+    ? `<svg class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+    : type === 'error'
+    ? `<svg class="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`
+    : `<svg class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+
+  toast.innerHTML = `
+    ${iconSvg}
+    <div class="flex-1 text-xs">
+      <h5 class="font-bold text-white text-sm mb-0.5">${title}</h5>
+      <p class="text-slate-300 leading-relaxed">${message}</p>
+    </div>
+    <button class="text-slate-400 hover:text-white shrink-0 mt-0.5" onclick="this.parentElement.remove()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.remove('translate-y-2', 'opacity-0');
+  });
+
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-x-4');
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
+// Override native window.alert to automatically use our stylish Toast box
+window.alert = function(msg) {
+  showToast('Notification', msg, 'info');
+};
+
 // Navigation Controller
 window.navigate = function(viewId) {
   currentView = viewId;
@@ -704,11 +754,20 @@ document.getElementById('inpaint-btn-run').addEventListener('click', async () =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
+      
+      let data;
+      const resText = await res.text();
+      try {
+        data = JSON.parse(resText);
+      } catch (jsonErr) {
+        hideBannerProgress();
+        showToast('Server Response Error', `Backend returned status ${res.status}: ${resText.slice(0, 120)}`, 'error');
+        return;
+      }
       hideBannerProgress();
 
       if (!res.ok) {
-        alert(`GPU Offline / Error: ${data.detail || 'Remote GPU is not connected'}`);
+        showToast('GPU / Inpaint Error', data.detail || 'Remote GPU is not connected', 'error');
         return;
       }
 
@@ -721,10 +780,11 @@ document.getElementById('inpaint-btn-run').addEventListener('click', async () =>
         document.getElementById('inpaint-result-box').innerHTML = `
           <img src="${data.result_image_url}" class="w-full h-full object-contain cursor-pointer transition hover:scale-[1.02]" title="Click to open full resolution" onclick="window.open('${data.result_image_url}', '_blank')" />
         `;
+        showToast('Inpainting Success', 'SDXL DDPM Reverse Diffusion completed successfully!', 'success');
       }
     } catch (err) {
       hideBannerProgress();
-      alert('Inpainting failed: ' + err.message);
+      showToast('Inpainting Failed', err.message, 'error');
     }
   });
 });
@@ -914,47 +974,6 @@ document.getElementById('redesign-btn-run').addEventListener('click', async () =
 // -------------------------------------------------------------
 // 8. SETTINGS & COLAB REMOTE WORKER
 // -------------------------------------------------------------
-function showToast(title, message, type = 'success') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  toast.className = `pointer-events-auto flex items-start space-x-3 p-4 rounded-xl shadow-2xl border transition-all duration-300 transform translate-y-2 opacity-0 max-w-sm ${
-    type === 'success' 
-      ? 'bg-slate-900 border-emerald-500/40 text-emerald-300 shadow-emerald-950/50' 
-      : type === 'error'
-      ? 'bg-slate-900 border-rose-500/40 text-rose-300 shadow-rose-950/50'
-      : 'bg-slate-900 border-indigo-500/40 text-indigo-300 shadow-indigo-950/50'
-  }`;
-
-  const iconSvg = type === 'success' 
-    ? `<svg class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
-    : type === 'error'
-    ? `<svg class="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`
-    : `<svg class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-
-  toast.innerHTML = `
-    ${iconSvg}
-    <div class="flex-1 text-xs">
-      <h5 class="font-bold text-white text-sm mb-0.5">${title}</h5>
-      <p class="text-slate-300 leading-relaxed">${message}</p>
-    </div>
-    <button class="text-slate-400 hover:text-white shrink-0 mt-0.5" onclick="this.parentElement.remove()">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-    </button>
-  `;
-
-  container.appendChild(toast);
-  requestAnimationFrame(() => {
-    toast.classList.remove('translate-y-2', 'opacity-0');
-  });
-
-  setTimeout(() => {
-    toast.classList.add('opacity-0', 'translate-x-4');
-    setTimeout(() => toast.remove(), 300);
-  }, 4500);
-}
-
 async function loadSettings() {
   const spinner = document.getElementById('reload-spinner');
   if (spinner) spinner.classList.add('animate-spin');
