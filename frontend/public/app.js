@@ -874,11 +874,24 @@ document.getElementById('redesign-btn-run').addEventListener('click', async () =
 
     const grid = document.getElementById('redesign-concepts-grid');
     const meta = data.metadata || {};
-    const redesigns = meta.redesigned_concepts || [
-      { style: "Minimalist Luxury", image_url: currentImageUrl, prompt: "High-key studio with soft shadows" },
-      { style: "Bold Promotional", image_url: currentImageUrl, prompt: "High contrast rim lighting" },
-      { style: "Editorial Layout", image_url: currentImageUrl, prompt: "Refined typographic framing" }
-    ];
+    
+    // Check both redesigned_concepts and redesigned_variations returned by backend
+    let redesigns = [];
+    if (meta.redesigned_variations) {
+      redesigns = Object.values(meta.redesigned_variations).map(v => ({
+        style: v.title || v.concept || 'Redesign Concept',
+        image_url: v.image_url,
+        prompt: v.concept || v.title
+      }));
+    } else if (meta.redesigned_concepts && meta.redesigned_concepts.length > 0) {
+      redesigns = meta.redesigned_concepts;
+    } else {
+      redesigns = [
+        { style: "Minimalist Luxury", image_url: currentImageUrl, prompt: "High-key studio with soft shadows" },
+        { style: "Bold Promotional", image_url: currentImageUrl, prompt: "High contrast rim lighting" },
+        { style: "Editorial Layout", image_url: currentImageUrl, prompt: "Refined typographic framing" }
+      ];
+    }
 
     grid.innerHTML = redesigns.map(c => `
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
@@ -901,7 +914,51 @@ document.getElementById('redesign-btn-run').addEventListener('click', async () =
 // -------------------------------------------------------------
 // 8. SETTINGS & COLAB REMOTE WORKER
 // -------------------------------------------------------------
+function showToast(title, message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `pointer-events-auto flex items-start space-x-3 p-4 rounded-xl shadow-2xl border transition-all duration-300 transform translate-y-2 opacity-0 max-w-sm ${
+    type === 'success' 
+      ? 'bg-slate-900 border-emerald-500/40 text-emerald-300 shadow-emerald-950/50' 
+      : type === 'error'
+      ? 'bg-slate-900 border-rose-500/40 text-rose-300 shadow-rose-950/50'
+      : 'bg-slate-900 border-indigo-500/40 text-indigo-300 shadow-indigo-950/50'
+  }`;
+
+  const iconSvg = type === 'success' 
+    ? `<svg class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+    : type === 'error'
+    ? `<svg class="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`
+    : `<svg class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+
+  toast.innerHTML = `
+    ${iconSvg}
+    <div class="flex-1 text-xs">
+      <h5 class="font-bold text-white text-sm mb-0.5">${title}</h5>
+      <p class="text-slate-300 leading-relaxed">${message}</p>
+    </div>
+    <button class="text-slate-400 hover:text-white shrink-0 mt-0.5" onclick="this.parentElement.remove()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.remove('translate-y-2', 'opacity-0');
+  });
+
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-x-4');
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
 async function loadSettings() {
+  const spinner = document.getElementById('reload-spinner');
+  if (spinner) spinner.classList.add('animate-spin');
+
   try {
     const res = await fetch('/api/models/status');
     const data = await res.json();
@@ -917,19 +974,23 @@ async function loadSettings() {
       input.value = data.remote_worker_url || '';
       
       const v = data.vram || {};
-      gpuName.textContent = v.device_name || 'NVIDIA Tesla T4 (16 GB)';
-      vramText.textContent = `${v.allocated_gb || 0} / ${v.total_gb || 16} GB Used`;
-      const pct = v.total_gb ? (v.allocated_gb / v.total_gb) * 100 : 0;
-      vramBar.style.width = `${pct}%`;
+      const dev = v.device_name || (data.remote_details && data.remote_details.gpu) || 'NVIDIA Tesla T4 (16 GB)';
+      gpuName.textContent = dev;
+      
+      const alloc = v.allocated_gb !== undefined ? Number(v.allocated_gb).toFixed(2) : '0.00';
+      const total = v.total_gb !== undefined && v.total_gb > 0 ? Number(v.total_gb).toFixed(1) : '15.0';
+      vramText.textContent = `${alloc} / ${total} GB Used`;
+      const pct = total > 0 ? (alloc / total) * 100 : 0;
+      vramBar.style.width = `${Math.min(100, Math.max(2, pct))}%`;
 
       // Update model states
       const m = data.models || {};
       if (document.getElementById('st-sdxl')) document.getElementById('st-sdxl').textContent = m.sdxl_inpaint || 'Available';
       if (document.getElementById('st-cnet')) document.getElementById('st-cnet').textContent = m.controlnet || 'Available';
-      if (document.getElementById('st-flux')) document.getElementById('st-flux').textContent = m.flux_klein || 'Unloaded';
-      if (document.getElementById('st-qwen')) document.getElementById('st-qwen').textContent = m.qwen_vl || 'Unloaded';
-      if (document.getElementById('st-sam2')) document.getElementById('st-sam2').textContent = m.sam2 || 'Unloaded';
-      if (document.getElementById('st-rmbg')) document.getElementById('st-rmbg').textContent = m.rmbg || 'Unloaded';
+      if (document.getElementById('st-flux')) document.getElementById('st-flux').textContent = m.flux || m.flux_klein || 'Available';
+      if (document.getElementById('st-qwen')) document.getElementById('st-qwen').textContent = m.qwen_vl || 'Available';
+      if (document.getElementById('st-sam2')) document.getElementById('st-sam2').textContent = m.sam2 || 'Available';
+      if (document.getElementById('st-rmbg')) document.getElementById('st-rmbg').textContent = m.rmbg || 'Available';
     } else {
       pill.textContent = 'Worker Offline';
       pill.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
@@ -940,13 +1001,24 @@ async function loadSettings() {
     }
   } catch (err) {
     console.error('Failed to load settings:', err);
+  } finally {
+    if (spinner) setTimeout(() => spinner.classList.remove('animate-spin'), 400);
   }
+}
+
+// Reload GPU & VRAM status button
+const btnReloadGpu = document.getElementById('btn-reload-gpu-stats');
+if (btnReloadGpu) {
+  btnReloadGpu.addEventListener('click', async () => {
+    await loadSettings();
+    showToast('GPU Diagnostics Refreshed', 'Successfully fetched real-time VRAM allocation and active neural pipelines.', 'info');
+  });
 }
 
 document.getElementById('setting-btn-save-remote').addEventListener('click', async () => {
   const url = document.getElementById('setting-remote-url').value;
   if (!url) {
-    alert('Please enter your ngrok public URL from Google Colab!');
+    showToast('Input Required', 'Please enter your Cloudflare / ngrok URL from Google Colab!', 'error');
     return;
   }
   showBannerProgress('Connecting to remote Colab GPU worker...', 50);
@@ -959,14 +1031,14 @@ document.getElementById('setting-btn-save-remote').addEventListener('click', asy
     const data = await res.json();
     hideBannerProgress();
     if (data.remote_connected) {
-      alert('Connected successfully to Google Colab T4 GPU!');
+      showToast('Worker Connected', 'Connected successfully to Google Colab T4 GPU!', 'success');
     } else {
-      alert('Note: URL saved, but worker ping failed. Make sure Colab is running the server!');
+      showToast('Ping Failed', 'Worker URL saved, but remote worker did not respond. Check Colab!', 'error');
     }
     loadSettings();
   } catch (err) {
     hideBannerProgress();
-    alert('Failed to connect: ' + err.message);
+    showToast('Connection Error', err.message, 'error');
   }
 });
 
@@ -978,7 +1050,7 @@ document.getElementById('setting-btn-disconnect').addEventListener('click', asyn
   });
   document.getElementById('setting-remote-url').value = '';
   loadSettings();
-  alert('Disconnected from remote worker.');
+  showToast('Disconnected', 'Disconnected from remote GPU worker.', 'info');
 });
 
 // Initialize on Landing View

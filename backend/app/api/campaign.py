@@ -42,7 +42,7 @@ def run_campaign_matrix_task(job_id: str, req_data: dict):
         logger.error(f"Campaign Matrix Job {job_id} failed: {e}")
         job_registry.update_job(job_id, status=JobStatus.FAILED, error=str(e))
 
-@router.post("/generate-matrix", response_model=JobResponse)
+@router.post("/generate-matrix")
 @router.post("/matrix")
 async def generate_campaign_matrix(req: CampaignMatrixRequest, background_tasks: BackgroundTasks):
     """
@@ -80,6 +80,8 @@ async def generate_campaign_matrix(req: CampaignMatrixRequest, background_tasks:
                 })
 
         return {
+            "job_id": "direct_campaign_matrix",
+            "task_type": "CAMPAIGN_MATRIX",
             "status": "COMPLETED",
             "progress": 100,
             "zip_url": result_data["zip_url"],
@@ -87,7 +89,7 @@ async def generate_campaign_matrix(req: CampaignMatrixRequest, background_tasks:
             "metadata": result_data
         }
     except Exception as e:
-        logger.error(f"Campaign Matrix execution failed: {e}")
+        logger.error(f"Campaign Matrix execution failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/export-zip/{zip_id}")
