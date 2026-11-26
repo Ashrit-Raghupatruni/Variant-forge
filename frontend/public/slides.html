@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VariantForge AI — Presentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS RESET & DESIGN TOKENS
+       ========================================================================== */
+    :root {
+      --bg-dark: #0B1120;
+      --bg-dark-card: rgba(30, 41, 59, 0.7);
+      --bg-light: #F7F5F0;
+      --bg-light-card: #FFFFFF;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --text-light: #F8FAFC;
+      --text-light-muted: #94A3B8;
+      --accent-coral: #FF5A36;
+      --accent-coral-glow: rgba(255, 90, 54, 0.25);
+      --accent-teal: #0D9488;
+      --accent-teal-light: #2DD4BF;
+      --border-light: #E2E8F0;
+      --border-dark: rgba(255, 255, 255, 0.1);
+      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+      user-select: none;
+    }
+
+    /* ==========================================================================
+       DECK STAGE & SLIDE STRUCTURE
+       ========================================================================== */
+    #deck-stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1200px;
+    }
+
+    .slide-viewport {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 1920px;
+      max-height: 1080px;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 5rem 6.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(60px);
+      transition: transform 450ms var(--ease-fluid), opacity 450ms var(--ease-fluid), visibility 450ms;
+      will-change: transform, opacity;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+      z-index: 10;
+    }
+
+    .slide.prev {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-60px);
+      z-index: 5;
+    }
+
+    /* THEMES */
+    .slide.theme-dark {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+    }
+
+    .slide.theme-light {
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+    }
+
+    /* ==========================================================================
+       TYPOGRAPHY & SHARED ELEMENTS
+       ========================================================================== */
+    .slide-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      width: fit-content;
+      margin-bottom: 1rem;
+    }
+
+    .theme-dark .slide-badge {
+      background: rgba(255, 90, 54, 0.15);
+      color: var(--accent-coral);
+      border: 1px solid rgba(255, 90, 54, 0.3);
+    }
+
+    .theme-light .slide-badge {
+      background: #EBE7DF;
+      color: #78716C;
+      border: 1px solid #D6D3CD;
+    }
+
+    .slide-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.75rem;
+    }
+
+    .theme-dark .slide-title {
+      color: #FFFFFF;
+    }
+
+    .theme-light .slide-title {
+      color: #0F172A;
+    }
+
+    .slide-subtitle {
+      font-size: 1.25rem;
+      line-height: 1.5;
+      max-width: 900px;
+      font-weight: 400;
+    }
+
+    .theme-dark .slide-subtitle {
+      color: var(--text-light-muted);
+    }
+
+    .theme-light .slide-subtitle {
+      color: #475569;
+    }
+
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding-top: 1.5rem;
+      border-top: 1px solid transparent;
+    }
+
+    .theme-dark .slide-footer {
+      border-color: rgba(255, 255, 255, 0.08);
+      color: var(--text-light-muted);
+    }
+
+    .theme-light .slide-footer {
+      border-color: rgba(0, 0, 0, 0.08);
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       ANIMATIONS (animate skill compliant)
+       ========================================================================== */
+    .stagger-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: transform 380ms var(--ease-snappy), opacity 380ms var(--ease-snappy);
+      will-change: transform, opacity;
+    }
+
+    .slide.active .stagger-item {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide.active .stagger-delay-1 { transition-delay: 80ms; }
+    .slide.active .stagger-delay-2 { transition-delay: 160ms; }
+    .slide.active .stagger-delay-3 { transition-delay: 240ms; }
+    .slide.active .stagger-delay-4 { transition-delay: 320ms; }
+    .slide.active .stagger-delay-5 { transition-delay: 400ms; }
+    .slide.active .stagger-delay-6 { transition-delay: 480ms; }
+    .slide.active .stagger-delay-7 { transition-delay: 560ms; }
+
+    /* ==========================================================================
+       SLIDE 1: TITLE SLIDE
+       ========================================================================== */
+    .s1-container {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      align-items: center;
+      height: 100%;
+      gap: 4rem;
+    }
+
+    .s1-emblem-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .s1-emblem-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, var(--accent-coral-glow) 0%, rgba(13, 148, 136, 0.15) 50%, transparent 70%);
+      filter: blur(40px);
+      animation: pulseGlow 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      100% { transform: scale(1.15); opacity: 0.9; }
+    }
+
+    .s1-emblem {
+      display: grid;
+      grid-template-columns: repeat(2, 100px);
+      grid-template-rows: repeat(2, 100px);
+      gap: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .s1-tile {
+      width: 100px;
+      height: 100px;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: transform 300ms var(--ease-fluid);
+    }
+
+    .s1-tile:hover {
+      transform: scale(1.06);
+    }
+
+    .s1-tile-coral { background: linear-gradient(135deg, #FF6B4A, #FF451A); }
+    .s1-tile-teal  { background: linear-gradient(135deg, #2DD4BF, #0D9488); }
+    .s1-tile-cream { background: linear-gradient(135deg, #FAF8F5, #E5E0D8); }
+    .s1-tile-dark  { background: linear-gradient(135deg, #1E293B, #0F172A); border: 1px solid rgba(255,255,255,0.1); }
+
+    .s1-repo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      color: var(--text-light-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      margin-top: 2rem;
+    }
+
+    /* ==========================================================================
+       SLIDE 2: WHAT IT DOES
+       ========================================================================== */
+    .s2-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin: auto 0;
+    }
+
+    .s2-card {
+      background: var(--bg-light-card);
+      border-radius: 20px;
+      padding: 2.25rem 1.75rem;
+      border: 1px solid var(--border-light);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03), 0 8px 10px -6px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 380px;
+      transition: transform 250ms var(--ease-fluid), box-shadow 250ms var(--ease-fluid);
+    }
+
+    .s2-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.07);
+    }
+
+    .s2-card-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--accent-coral);
+    }
+
+    .s2-card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .s2-card-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #64748B;
+    }
+
+    .s2-card-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #F1F5F9;
+      color: #475569;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    /* ==========================================================================
+       SLIDE 3: ARCHITECTURE
+       ========================================================================== */
+    .s3-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 1.25rem;
+      margin: auto 0;
+    }
+
+    .s3-box {
+      background: var(--bg-light-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 2.25rem;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+      height: 340px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .s3-box-header {
+      border-bottom: 2px solid #F1F5F9;
+      padding-bottom: 1rem;
+    }
+
+    .s3-box-role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent-coral);
+      letter-spacing: 0.08em;
+    }
+
+    .s3-box-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-top: 0.25rem;
+    }
+
+    .s3-items {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin: 1rem 0;
+    }
+
+    .s3-items li {
+      font-size: 0.9rem;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .s3-items li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-teal);
+    }
+
+    .s3-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94A3B8;
+      font-size: 1.75rem;
+    }
+
+    .s3-callout {
+      background: #0F172A;
+      color: #F8FAFC;
+      border-radius: 14px;
+      padding: 1.15rem 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.2);
+    }
+
+    .s3-callout-badge {
+      background: var(--accent-coral);
+      color: white;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ==========================================================================
+       SLIDE 4: THE AI MODEL STACK
+       ========================================================================== */
+    .s4-table-card {
+      background: var(--bg-light-card);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+      overflow: hidden;
+      margin: auto 0;
+    }
+
+    .s4-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .s4-table th {
+      background: #F8FAFC;
+      padding: 1.1rem 1.75rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .s4-table td {
+      padding: 1.1rem 1.75rem;
+      font-size: 0.95rem;
+      color: #334155;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .s4-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .s4-model-tag {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #F0FDF4;
+      color: #166534;
+      border: 1px solid #BBF7D0;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .s4-engine-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #64748B;
+    }
+
+    .s4-note {
+      font-size: 0.85rem;
+      color: #64748B;
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ==========================================================================
+       SLIDE 5: PROCESS 1 · REDESIGN
+       ========================================================================== */
+    .s5-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1.1rem;
+      margin: auto 0;
+    }
+
+    .s5-step-card {
+      background: var(--bg-light-card);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 1.75rem 1.25rem;
+      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 360px;
+      position: relative;
+    }
+
+    .s5-step-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-coral);
+    }
+
+    .s5-step-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .s5-step-desc {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #64748B;
+    }
+
+    .s5-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: #F8FAFC;
+      color: #475569;
+      border: 1px solid #E2E8F0;
+      width: fit-content;
+    }
+
+    /* ==========================================================================
+       SLIDE 6: PROCESS 2 · CAMPAIGN MATRIX
+       ========================================================================== */
+    .s6-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin: auto 0;
+    }
+
+    .s6-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .s6-mini-card {
+      background: var(--bg-light-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 1.4rem 1.1rem;
+      box-shadow: 0 6px 15px -3px rgba(0,0,0,0.03);
+    }
+
+    .s6-mini-num {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-coral);
+    }
+
+    .s6-mini-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 0.35rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .s6-mini-desc {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #64748B;
+    }
+
+    .s6-hero-card {
+      background: linear-gradient(145deg, #0F172A, #1E293B);
+      border-radius: 20px;
+      padding: 2.5rem;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .s6-hero-card::after {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 180px;
+      height: 180px;
+      background: var(--accent-coral);
+      filter: blur(60px);
+      opacity: 0.35;
+    }
+
+    .s6-hero-stat {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent-coral);
+    }
+
+    .s6-hero-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+
+    .s6-specs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: #94A3B8;
+      margin-top: 1.5rem;
+    }
+
+    .s6-spec-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* ==========================================================================
+       SLIDE 7: STACK AND DELIVERY
+       ========================================================================== */
+    .s7-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      margin: auto 0;
+    }
+
+    .s7-col {
+      background: var(--bg-dark-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .s7-col-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .s7-stack-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .s7-stack-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 1rem;
+    }
+
+    .s7-stack-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .s7-stack-label {
+      font-weight: 600;
+      color: #F8FAFC;
+      font-size: 0.95rem;
+    }
+
+    .s7-stack-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-teal-light);
+      text-align: right;
+      max-width: 60%;
+    }
+
+    .s7-bottom-bar {
+      background: var(--accent-coral);
+      color: white;
+      border-radius: 14px;
+      padding: 1.25rem 2rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(255, 90, 54, 0.3);
+    }
+
+    /* ==========================================================================
+       PRESENTER CONTROLS & HUD
+       ========================================================================== */
+    #deck-hud {
+      position: fixed;
+      bottom: 1.75rem;
+      right: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.5rem 0.85rem;
+      border-radius: 9999px;
+      color: white;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .hud-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 200ms ease;
+    }
+
+    .hud-btn:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .hud-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0 0.5rem;
+      color: #F8FAFC;
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--accent-coral);
+      width: 0%;
+      z-index: 200;
+      transition: width 400ms var(--ease-fluid);
+    }
+
+    /* KEYBOARD SHORTCUTS HINT */
+    .keys-hint {
+      position: fixed;
+      bottom: 1.75rem;
+      left: 2.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #64748B;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    kbd {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      color: #CBD5E1;
+    }
+
+    /* REDUCED MOTION SUPPORT */
+    @media (prefers-reduced-motion: reduce) {
+      .slide, .stagger-item, #progress-bar, .s1-tile, .s2-card {
+        transition: none !important;
+        animation: none !important;
+      }
+      .slide.active {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .slide.active .stagger-item {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Progress Indicator -->
+  <div id="progress-bar"></div>
+
+  <!-- Keyboard Shortcuts Tag -->
+  <div class="keys-hint">
+    Use <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>Space</kbd> &bull; <kbd>F</kbd> for fullscreen
+  </div>
+
+  <!-- Stage -->
+  <div id="deck-stage">
+    <div class="slide-viewport">
+
+      <!-- ====================================================================
+           SLIDE 01: TITLE
+           ==================================================================== -->
+      <section class="slide theme-dark active" data-slide="1">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">VariantForge AI</span>
+        </div>
+
+        <div class="s1-container">
+          <div>
+            <h1 class="slide-title stagger-item stagger-delay-2" style="font-size: 3.25rem;">
+              A multi-platform creative editor and AI redesign system for growth marketing teams
+            </h1>
+            <p class="slide-subtitle stagger-item stagger-delay-3" style="margin-top: 1.5rem;">
+              High-throughput visual production engine unifying text extraction, layout audit, SDXL inpainting, ControlNet edge preservation, and automated multi-channel campaign generation.
+            </p>
+            <div class="s1-repo-pill stagger-item stagger-delay-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+              <span>ashriths/GENAI &bull; main</span>
+            </div>
+          </div>
+
+          <div class="s1-emblem-wrapper stagger-item stagger-delay-3">
+            <div class="s1-emblem-glow"></div>
+            <div class="s1-emblem">
+              <div class="s1-tile s1-tile-coral"></div>
+              <div class="s1-tile s1-tile-teal"></div>
+              <div class="s1-tile s1-tile-cream"></div>
+              <div class="s1-tile s1-tile-dark"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-5">
+          <span>Production Architecture &bull; 2026</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 01 / 07</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 02: WHAT IT DOES
+           ==================================================================== -->
+      <section class="slide theme-light" data-slide="2">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">WHAT IT DOES</span>
+          <h2 class="slide-title stagger-item stagger-delay-2">One platform for creative production</h2>
+          <p class="slide-subtitle stagger-item stagger-delay-3">
+            From a single product photo or an existing creative to fully localized, multi-platform ad campaigns in seconds.
+          </p>
+        </div>
+
+        <div class="s2-grid">
+          <div class="s2-card stagger-item stagger-delay-2">
+            <div>
+              <span class="s2-card-num">01</span>
+              <h3 class="s2-card-title">AI redesign</h3>
+              <p class="s2-card-desc">
+                Upload any existing ad or creative. The system audits layout, extracts copy, isolates subjects, and generates 3 distinct strategic redesigns.
+              </p>
+            </div>
+            <span class="s2-card-tag">Qwen-VL + SDXL</span>
+          </div>
+
+          <div class="s2-card stagger-item stagger-delay-3">
+            <div>
+              <span class="s2-card-num">02</span>
+              <h3 class="s2-card-title">Campaign matrix</h3>
+              <p class="s2-card-desc">
+                One product photo in, 16 production-ready creatives out: 4 distinct visual backdrops across 4 key ad aspect ratios, completely automated.
+              </p>
+            </div>
+            <span class="s2-card-tag">1:1 &bull; 9:16 &bull; 16:9 &bull; 4:5</span>
+          </div>
+
+          <div class="s2-card stagger-item stagger-delay-4">
+            <div>
+              <span class="s2-card-num">03</span>
+              <h3 class="s2-card-title">Smart editing</h3>
+              <p class="s2-card-desc">
+                Interactive canvas studio featuring brush-based SDXL inpainting, ControlNet Canny edge guidance, and one-click salient object isolation.
+              </p>
+            </div>
+            <span class="s2-card-tag">Interactive Canvas</span>
+          </div>
+
+          <div class="s2-card stagger-item stagger-delay-5">
+            <div>
+              <span class="s2-card-num">04</span>
+              <h3 class="s2-card-title">Localization</h3>
+              <p class="s2-card-desc">
+                Instant translation of headline copy across 5 languages with automatic font size fitting and currency symbol substitution.
+              </p>
+            </div>
+            <span class="s2-card-tag">Multi-Market Ready</span>
+          </div>
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-6">
+          <span>VariantForge AI &bull; Core Capabilities</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 02 / 07</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 03: HOW IT WORKS - ARCHITECTURE
+           ==================================================================== -->
+      <section class="slide theme-light" data-slide="3">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">HOW IT WORKS</span>
+          <h2 class="slide-title stagger-item stagger-delay-2">End-to-end decoupled system architecture</h2>
+          <p class="slide-subtitle stagger-item stagger-delay-3">
+            A 3-tier production pipeline separating interactive client state from asynchronous GPU compute.
+          </p>
+        </div>
+
+        <div class="s3-flow">
+          <div class="s3-box stagger-item stagger-delay-2">
+            <div class="s3-box-header">
+              <span class="s3-box-role">TIER 01</span>
+              <h3 class="s3-box-name">FRONTEND</h3>
+            </div>
+            <ul class="s3-items">
+              <li>Unified creative canvas studio</li>
+              <li>Interactive mask brush engine</li>
+              <li>Multi-asset campaign matrix viewer</li>
+              <li>Real-time layer management</li>
+            </ul>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748B;">HTML5 Canvas &bull; Tailwind &bull; JS</span>
+          </div>
+
+          <div class="s3-arrow stagger-item stagger-delay-3">&rarr;</div>
+
+          <div class="s3-box stagger-item stagger-delay-3">
+            <div class="s3-box-header">
+              <span class="s3-box-role">TIER 02</span>
+              <h3 class="s3-box-name">BACKEND</h3>
+            </div>
+            <ul class="s3-items">
+              <li>FastAPI asynchronous orchestrator</li>
+              <li>In-memory job management queue</li>
+              <li>Multi-format Pillow compositor</li>
+              <li>Safe fallback mock generators</li>
+            </ul>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748B;">Python 3.10+ &bull; FastAPI &bull; Uvicorn</span>
+          </div>
+
+          <div class="s3-arrow stagger-item stagger-delay-4">&rarr;</div>
+
+          <div class="s3-box stagger-item stagger-delay-4">
+            <div class="s3-box-header">
+              <span class="s3-box-role">TIER 03</span>
+              <h3 class="s3-box-name">ML WORKER</h3>
+            </div>
+            <ul class="s3-items">
+              <li>SDXL Inpainting (Diffusers fp16)</li>
+              <li>ControlNet Canny edge preservation</li>
+              <li>BRIA RMBG / U2Net cutout engine</li>
+              <li>PaddleOCR / EasyOCR on CUDA</li>
+            </ul>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748B;">PyTorch &bull; CUDA 12 &bull; Cloudflare Tunnel</span>
+          </div>
+        </div>
+
+        <div class="s3-callout stagger-item stagger-delay-5">
+          <span class="s3-callout-badge">Async by Design</span>
+          <span>Heavy diffusion and vision tasks run as non-blocking background jobs with polling and WebSocket streaming. The UI never freezes.</span>
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-6">
+          <span>Decoupled Architecture &bull; Scalable GPU Inference</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 03 / 07</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 04: THE AI MODEL STACK
+           ==================================================================== -->
+      <section class="slide theme-light" data-slide="4">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">HOW IT WORKS</span>
+          <h2 class="slide-title stagger-item stagger-delay-2">The AI model stack: purpose-built per pipeline stage</h2>
+          <p class="slide-subtitle stagger-item stagger-delay-3">
+            Every pipeline stage is mapped to a specialized, open-weights or foundation model for maximum performance.
+          </p>
+        </div>
+
+        <div class="s4-table-card stagger-item stagger-delay-3">
+          <table class="s4-table">
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>Model / Engine</th>
+                <th>Role & Execution</th>
+                <th>Target Hardware</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Design Audit</strong></td>
+                <td><span class="s4-model-tag">Qwen2.5-VL / Gemini Vision</span></td>
+                <td>Analyzes visual hierarchy, color palette, typography and copy</td>
+                <td><span class="s4-engine-tag">Cloud API / Worker</span></td>
+              </tr>
+              <tr>
+                <td><strong>Text Extraction</strong></td>
+                <td><span class="s4-model-tag">PaddleOCR / EasyOCR</span></td>
+                <td>Extracts text bounding boxes and content for editing & re-styling</td>
+                <td><span class="s4-engine-tag">CUDA GPU / CPU</span></td>
+              </tr>
+              <tr>
+                <td><strong>Image Generation</strong></td>
+                <td><span class="s4-model-tag">SDXL / FLUX.2 Klein 4B</span></td>
+                <td>Generates photorealistic themed backdrops from text prompts</td>
+                <td><span class="s4-engine-tag">T4 / A100 GPU</span></td>
+              </tr>
+              <tr>
+                <td><strong>Background Removal</strong></td>
+                <td><span class="s4-model-tag">BRIA RMBG-2.0 / U2Net</span></td>
+                <td>Isolates foreground product with high-precision alpha mask</td>
+                <td><span class="s4-engine-tag">CUDA GPU</span></td>
+              </tr>
+              <tr>
+                <td><strong>Edge Preservation</strong></td>
+                <td><span class="s4-model-tag">ControlNet SDXL Canny</span></td>
+                <td>Preserves structural product geometry during AI synthesis</td>
+                <td><span class="s4-engine-tag">CUDA GPU</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layout & Export</strong></td>
+                <td><span class="s4-model-tag">OpenCV & Pillow</span></td>
+                <td>Text rendering, multi-platform cropping, ZIP packaging</td>
+                <td><span class="s4-engine-tag">FastAPI Core CPU</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="s4-note stagger-item stagger-delay-4">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>Dynamic VRAM manager unloads idle models between pipeline stages, enabling full multi-model inference on a single 16GB T4 GPU.</span>
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-5">
+          <span>AI Foundation Stack &bull; GPU Memory Optimization</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 04 / 07</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 05: PROCESS 1 · REDESIGN
+           ==================================================================== -->
+      <section class="slide theme-light" data-slide="5">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">PROCESS 1 &bull; REDESIGN</span>
+          <h2 class="slide-title stagger-item stagger-delay-2">AI image redesign: from creative to 3 strategic directions</h2>
+          <p class="slide-subtitle stagger-item stagger-delay-3">
+            Ingest an existing high-performing ad, deconstruct it, and synthesize three distinct aesthetic directions.
+          </p>
+        </div>
+
+        <div class="s5-grid">
+          <div class="s5-step-card stagger-item stagger-delay-2">
+            <div>
+              <span class="s5-step-num">01</span>
+              <h3 class="s5-step-title">Extract text</h3>
+              <p class="s5-step-desc">
+                PaddleOCR detects headline, body, and CTA copy with exact bounding coordinates.
+              </p>
+            </div>
+            <span class="s5-badge">PaddleOCR</span>
+          </div>
+
+          <div class="s5-step-card stagger-item stagger-delay-3">
+            <div>
+              <span class="s5-step-num">02</span>
+              <h3 class="s5-step-title">Audit design</h3>
+              <p class="s5-step-desc">
+                Vision LLM evaluates color harmony, hierarchy flaws, and generates structured redesign briefs.
+              </p>
+            </div>
+            <span class="s5-badge">Qwen-VL</span>
+          </div>
+
+          <div class="s5-step-card stagger-item stagger-delay-4">
+            <div>
+              <span class="s5-step-num">03</span>
+              <h3 class="s5-step-title">Isolate product</h3>
+              <p class="s5-step-desc">
+                RMBG-2.0 separates the core subject from background noise with clean sub-pixel alpha edges.
+              </p>
+            </div>
+            <span class="s5-badge">RMBG-2.0</span>
+          </div>
+
+          <div class="s5-step-card stagger-item stagger-delay-5">
+            <div>
+              <span class="s5-step-num">04</span>
+              <h3 class="s5-step-title">3 directions</h3>
+              <p class="s5-step-desc">
+                SDXL generates Minimalist Studio, Lifestyle Contextual, and Bold High-Contrast backdrops.
+              </p>
+            </div>
+            <span class="s5-badge">SDXL Inpaint</span>
+          </div>
+
+          <div class="s5-step-card stagger-item stagger-delay-6">
+            <div>
+              <span class="s5-step-num">05</span>
+              <h3 class="s5-step-title">Rebuild layout</h3>
+              <p class="s5-step-desc">
+                Pillow compositor re-renders typography, applies drop shadows, and positions badges.
+              </p>
+            </div>
+            <span class="s5-badge">Pillow Engine</span>
+          </div>
+
+          <div class="s5-step-card stagger-item stagger-delay-7">
+            <div>
+              <span class="s5-step-num">06</span>
+              <h3 class="s5-step-title">Deliver</h3>
+              <p class="s5-step-desc">
+                Review in interactive side-by-side comparison studio or export production bundles.
+              </p>
+            </div>
+            <span class="s5-badge">ZIP Export</span>
+          </div>
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-7">
+          <span>AI Redesign Flow &bull; 6 Automated Steps</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 05 / 07</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 06: PROCESS 2 · CAMPAIGN MATRIX
+           ==================================================================== -->
+      <section class="slide theme-light" data-slide="6">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">PROCESS 2 &bull; CAMPAIGN MATRIX</span>
+          <h2 class="slide-title stagger-item stagger-delay-2">One photo to 16 ready-to-post creatives</h2>
+          <p class="slide-subtitle stagger-item stagger-delay-3">
+            Scale product launches across all major paid media channels in a single automated batch run.
+          </p>
+        </div>
+
+        <div class="s6-layout">
+          <div class="s6-steps">
+            <div class="s6-mini-card stagger-item stagger-delay-2">
+              <span class="s6-mini-num">01</span>
+              <h4 class="s6-mini-title">Analyze</h4>
+              <p class="s6-mini-desc">Vision audit identifies brand tones, category, and subject bounds.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-3">
+              <span class="s6-mini-num">02</span>
+              <h4 class="s6-mini-title">Cut out</h4>
+              <p class="s6-mini-desc">Automated transparent alpha cutout of the product.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-4">
+              <span class="s6-mini-num">03</span>
+              <h4 class="s6-mini-title">Prompt Backdrops</h4>
+              <p class="s6-mini-desc">Generates tailored scene prompts matching product aesthetics.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-5">
+              <span class="s6-mini-num">04</span>
+              <h4 class="s6-mini-title">4 Visual Styles</h4>
+              <p class="s6-mini-desc">Studio Minimal &bull; Cyber Neon &bull; Natural Organic &bull; Luxury Editorial.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-3">
+              <span class="s6-mini-num">05</span>
+              <h4 class="s6-mini-title">4 Aspect Ratios</h4>
+              <p class="s6-mini-desc">1:1 Square &bull; 9:16 Story/Reels &bull; 16:9 Landscape &bull; 4:5 Feed.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-4">
+              <span class="s6-mini-num">06</span>
+              <h4 class="s6-mini-title">Localize Copy</h4>
+              <p class="s6-mini-desc">Translates headlines into target languages and currencies.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-5">
+              <span class="s6-mini-num">07</span>
+              <h4 class="s6-mini-title">Brand Text</h4>
+              <p class="s6-mini-desc">Overlays high-legibility typographic CTA banners.</p>
+            </div>
+            <div class="s6-mini-card stagger-item stagger-delay-6">
+              <span class="s6-mini-num">08</span>
+              <h4 class="s6-mini-title">ZIP Package</h4>
+              <p class="s6-mini-desc">One-click structured ZIP export containing all 16 assets.</p>
+            </div>
+          </div>
+
+          <div class="s6-hero-card stagger-item stagger-delay-4">
+            <div>
+              <span class="s6-hero-stat">16</span>
+              <h3 class="s6-hero-title">Ready-to-Post Creatives</h3>
+              <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 0.5rem;">
+                Generated in under 45 seconds on a remote T4 GPU worker.
+              </p>
+            </div>
+
+            <div class="s6-specs">
+              <div class="s6-spec-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>4 Styles &times; 4 Dimensions</span>
+              </div>
+              <div class="s6-spec-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Full safe-zone text placement</span>
+              </div>
+              <div class="s6-spec-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Production ready 300 DPI exports</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-7">
+          <span>Batch Creative Engine &bull; 1 Photo to 16 Assets</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 06 / 07</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 07: STACK AND DELIVERY
+           ==================================================================== -->
+      <section class="slide theme-dark" data-slide="7">
+        <div>
+          <span class="slide-badge stagger-item stagger-delay-1">STACK AND DELIVERY</span>
+          <h2 class="slide-title stagger-item stagger-delay-2">Production-oriented by design</h2>
+          <p class="slide-subtitle stagger-item stagger-delay-3">
+            Built for reliability, throughput, and sub-second client responsiveness.
+          </p>
+        </div>
+
+        <div class="s7-grid">
+          <div class="s7-col stagger-item stagger-delay-3">
+            <h3 class="s7-col-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              <span>Tech Stack</span>
+            </h3>
+            <div class="s7-stack-list">
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Frontend</span>
+                <span class="s7-stack-value">HTML5 Canvas, Tailwind, Vanilla JS</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Backend</span>
+                <span class="s7-stack-value">FastAPI, Python 3.10+, Uvicorn</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">ML Framework</span>
+                <span class="s7-stack-value">PyTorch 2.x, Diffusers, EasyOCR</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Image Engine</span>
+                <span class="s7-stack-value">Pillow, NumPy, OpenCV</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Inference Tunnel</span>
+                <span class="s7-stack-value">Cloudflare Zero-Trust Tunnel</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="s7-col stagger-item stagger-delay-4">
+            <h3 class="s7-col-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-teal-light)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span>Quality & Delivery</span>
+            </h3>
+            <div class="s7-stack-list">
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">VRAM Efficiency</span>
+                <span class="s7-stack-value">Zero-leak sequential model offloading</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Job Queue</span>
+                <span class="s7-stack-value">Asynchronous background job worker</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Export Packaging</span>
+                <span class="s7-stack-value">Instant ZIP packaging & download</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Zero Auth Leak</span>
+                <span class="s7-stack-value">No HF token 403 blocks in Colab worker</span>
+              </div>
+              <div class="s7-stack-item">
+                <span class="s7-stack-label">Offline Mocking</span>
+                <span class="s7-stack-value">Automatic CPU fallbacks if GPU is offline</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s7-bottom-bar stagger-item stagger-delay-5">
+          One product photo in. A full multi-platform campaign out.
+        </div>
+
+        <div class="slide-footer stagger-item stagger-delay-6">
+          <span>VariantForge AI &bull; Production Ready</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">SLIDE 07 / 07</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Bottom Presenter HUD -->
+  <div id="deck-hud">
+    <button class="hud-btn" id="btn-prev" title="Previous Slide (Left Arrow)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <span class="hud-counter" id="slide-counter">01 / 07</span>
+    <button class="hud-btn" id="btn-next" title="Next Slide (Right Arrow)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+    <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+    <button class="hud-btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    </button>
+  </div>
+
+  <!-- ========================================================================
+       PRESENTATION CONTROLLER SCRIPT
+       ======================================================================== -->
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const counter = document.getElementById('slide-counter');
+      const progressBar = document.getElementById('progress-bar');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+      const btnFullscreen = document.getElementById('btn-fullscreen');
+      let currentIndex = 0;
+      const totalSlides = slides.length;
+
+      function updateSlide(newIndex, direction = 'next') {
+        if (newIndex < 0 || newIndex >= totalSlides) return;
+
+        const currentSlide = slides[currentIndex];
+        const nextSlide = slides[newIndex];
+
+        // Animate out current slide
+        currentSlide.classList.remove('active');
+        if (direction === 'next') {
+          currentSlide.classList.add('prev');
+        } else {
+          currentSlide.classList.remove('prev');
+        }
+
+        // Animate in new slide
+        nextSlide.classList.remove('prev');
+        nextSlide.classList.add('active');
+
+        currentIndex = newIndex;
+
+        // Update Counter & Progress Bar
+        const numStr = String(currentIndex + 1).padStart(2, '0');
+        const totStr = String(totalSlides).padStart(2, '0');
+        counter.textContent = `${numStr} / ${totStr}`;
+        const pct = ((currentIndex + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+
+        // Update URL hash without scroll
+        history.replaceState(null, null, `#${currentIndex + 1}`);
+      }
+
+      function nextSlide() {
+        if (currentIndex < totalSlides - 1) {
+          updateSlide(currentIndex + 1, 'next');
+        }
+      }
+
+      function prevSlide() {
+        if (currentIndex > 0) {
+          updateSlide(currentIndex - 1, 'prev');
+        }
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      // Keyboard Event Listeners
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
+          e.preventDefault();
+          prevSlide();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          updateSlide(0, 'prev');
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          updateSlide(totalSlides - 1, 'next');
+        } else if (e.key.toLowerCase() === 'f') {
+          toggleFullscreen();
+        }
+      });
+
+      // Button Handlers
+      btnNext.addEventListener('click', nextSlide);
+      btnPrev.addEventListener('click', prevSlide);
+      btnFullscreen.addEventListener('click', toggleFullscreen);
+
+      // Touch / Swipe Navigation
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleGesture();
+      }, { passive: true });
+
+      function handleGesture() {
+        const threshold = 50;
+        if (touchEndX < touchStartX - threshold) {
+          nextSlide();
+        } else if (touchEndX > touchStartX + threshold) {
+          prevSlide();
+        }
+      }
+
+      // Initial Hash Check
+      const hash = parseInt(window.location.hash.replace('#', ''), 10);
+      if (!isNaN(hash) && hash >= 1 && hash <= totalSlides) {
+        updateSlide(hash - 1, 'next');
+      } else {
+        updateSlide(0, 'next');
+      }
+    })();
+  </script>
+</body>
+</html>

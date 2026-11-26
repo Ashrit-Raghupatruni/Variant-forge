@@ -48,9 +48,17 @@ FRONTEND_PUBLIC = os.path.abspath(
     os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "public")
 )
 FRONTEND_INDEX = os.path.join(FRONTEND_PUBLIC, "index.html")
+FRONTEND_SLIDES = os.path.join(FRONTEND_PUBLIC, "slides.html")
 
 if os.path.exists(FRONTEND_PUBLIC):
     app.mount("/static", StaticFiles(directory=FRONTEND_PUBLIC), name="static")
+
+@app.get("/slides")
+def serve_slides():
+    """Serves the VariantForge AI Presentation Deck."""
+    if os.path.exists(FRONTEND_SLIDES):
+        return FileResponse(FRONTEND_SLIDES)
+    return {"error": "Presentation slides not found"}
 
 @app.get("/")
 def serve_ui():
